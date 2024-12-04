@@ -6,4 +6,4 @@ def main():
     guest_controller = GuestController()
     guest_form = GuestListForm(guest_controller.guest_list)
 
-    
+    #while True:
