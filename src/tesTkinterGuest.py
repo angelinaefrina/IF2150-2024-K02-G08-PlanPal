@@ -58,7 +58,7 @@ class GuestListApp:
 
                 if not guest_name:
                     raise ValueError("Guest name cannot be empty.")
-                if rsvp_status not in ["Accepted", "Declined", "Pending"]:
+                if rsvp_status not in ["Hadir", "Tidak Hadir", "Pending"]:
                     raise ValueError("Invalid RSVP status.")
                 
                 self.controller.add_guest_list(guest_id, guest_name, rsvp_status)
@@ -81,8 +81,8 @@ class GuestListApp:
         entry_name.grid(row=1, column=1, padx=10, pady=5)
 
         tk.Label(add_window, text="RSVP Status:").grid(row=2, column=0, padx=10, pady=5)
-        rsvp_var = tk.StringVar(value="Accepted")
-        rsvp_dropdown = ttk.Combobox(add_window, textvariable=rsvp_var, values=["Accepted", "Declined", "Pending"])
+        rsvp_var = tk.StringVar(value="Hadir")
+        rsvp_dropdown = ttk.Combobox(add_window, textvariable=rsvp_var, values=["Hadir", "Tidak Hadir", "Pending"], state="readonly")
         rsvp_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
         save_button = ttk.Button(add_window, text="Save", command=save_guest)
@@ -110,7 +110,7 @@ class GuestListApp:
 
                 if not guest_name:
                     raise ValueError("Guest name cannot be empty.")
-                if rsvp_status not in ["Accepted", "Declined", "Pending"]:
+                if rsvp_status not in ["Hadir", "Tidak Hadir", "Pending"]:
                     raise ValueError("Invalid RSVP status.")
 
                 self.controller.edit_guest_list(int(guest[0]), guest_name, rsvp_status)
@@ -135,7 +135,7 @@ class GuestListApp:
 
         tk.Label(edit_window, text="RSVP Status:").grid(row=2, column=0, padx=10, pady=5)
         rsvp_var = tk.StringVar(value=guest[2])
-        rsvp_dropdown = ttk.Combobox(edit_window, textvariable=rsvp_var, values=["Accepted", "Declined", "Pending"])
+        rsvp_dropdown = ttk.Combobox(edit_window, textvariable=rsvp_var, values=["Hadir", "Tidak Hadir", "Pending"])
         rsvp_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
         save_button = ttk.Button(edit_window, text="Save Changes", command=save_changes)
