@@ -52,13 +52,18 @@ class GuestListApp:
                 return
             
             try:
-                guest_id = int(entry_id.get().strip())
+                # Generate Guest ID otomatis
+                if self.controller.guest_list:
+                    guest_id = max(guest["GuestID"] for guest in self.controller.guest_list) + 1
+                else:
+                    guest_id = 1  # Jika belum ada tamu, ID pertama adalah 1
+                
                 guest_name = entry_name.get().strip()
                 rsvp_status = rsvp_var.get().strip()
 
                 if not guest_name:
                     raise ValueError("Guest name cannot be empty.")
-                if rsvp_status not in ["Hadir", "Tidak Hadir", "Pending"]:
+                if rsvp_status not in ["Accepted", "Declined", "Pending"]:
                     raise ValueError("Invalid RSVP status.")
                 
                 self.controller.add_guest_list(guest_id, guest_name, rsvp_status)
@@ -72,17 +77,13 @@ class GuestListApp:
         add_window = tk.Toplevel(self.root)
         add_window.title("Add Guest")
 
-        tk.Label(add_window, text="Guest ID:").grid(row=0, column=0, padx=10, pady=5)
-        entry_id = tk.Entry(add_window)
-        entry_id.grid(row=0, column=1, padx=10, pady=5)
-
         tk.Label(add_window, text="Guest Name:").grid(row=1, column=0, padx=10, pady=5)
         entry_name = tk.Entry(add_window)
         entry_name.grid(row=1, column=1, padx=10, pady=5)
 
         tk.Label(add_window, text="RSVP Status:").grid(row=2, column=0, padx=10, pady=5)
-        rsvp_var = tk.StringVar(value="Hadir")
-        rsvp_dropdown = ttk.Combobox(add_window, textvariable=rsvp_var, values=["Hadir", "Tidak Hadir", "Pending"], state="readonly")
+        rsvp_var = tk.StringVar(value="Accepted")
+        rsvp_dropdown = ttk.Combobox(add_window, textvariable=rsvp_var, values=["Accepted", "Declined", "Pending"], state="readonly")
         rsvp_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
         save_button = ttk.Button(add_window, text="Save", command=save_guest)
@@ -110,7 +111,7 @@ class GuestListApp:
 
                 if not guest_name:
                     raise ValueError("Guest name cannot be empty.")
-                if rsvp_status not in ["Hadir", "Tidak Hadir", "Pending"]:
+                if rsvp_status not in ["Accepted", "Declined", "Pending"]:
                     raise ValueError("Invalid RSVP status.")
 
                 self.controller.edit_guest_list(int(guest[0]), guest_name, rsvp_status)
@@ -135,7 +136,7 @@ class GuestListApp:
 
         tk.Label(edit_window, text="RSVP Status:").grid(row=2, column=0, padx=10, pady=5)
         rsvp_var = tk.StringVar(value=guest[2])
-        rsvp_dropdown = ttk.Combobox(edit_window, textvariable=rsvp_var, values=["Hadir", "Tidak Hadir", "Pending"])
+        rsvp_dropdown = ttk.Combobox(edit_window, textvariable=rsvp_var, values=["Accepted", "Declined", "Pending"])
         rsvp_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
         save_button = ttk.Button(edit_window, text="Save Changes", command=save_changes)
