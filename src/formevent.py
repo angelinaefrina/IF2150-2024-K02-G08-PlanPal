@@ -13,10 +13,10 @@ class FormEvent:
     # Metode untuk menampilkan form
     def display_form(self):
         try:
-            event_id = input()
-            event_location = input()
-            event_date = input()
-            event_status = input()
+            event_id = input("Masukkan ID acara: ")
+            event_location = input("Masukkan lokasi acara: ")
+            event_date = input("Masukkan tanggal acara (YYYY-MM-DD): ")
+            event_status = input("Masukkan status acara: ")
             return {
                 "EventID": event_id,
                 "EventLocation": event_location,
