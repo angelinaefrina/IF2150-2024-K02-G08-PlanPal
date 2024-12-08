@@ -10,7 +10,6 @@ class FormEvent:
         else:
             self.display_error_message("Belum ada acara yang tersimpan.")
 
-    # Metode untuk menampilkan form
     def display_form(self):
         try:
             event_id = input()
@@ -27,22 +26,16 @@ class FormEvent:
             self.display_error(f"Error saat mengisi form: {e}")
             return None
 
-    # Metode untuk menyimpan form detail acara
-    def submit_form(self, form_data):
-        if form_data and self.validate_form_data(form_data):
-            self.event_details = form_data
-            print("Detail acara berhasil disimpan!")
-        else:
-            self.display_error_message("Data form tidak valid.")
+    def submit_form(self):
+        event_id, event_location, event_date, event_status = self.display_form()
+        self.controller_event.add_event(event_id, event_location, event_date, event_status)
 
     def display_error_message(self, message):
         print(f"Error: {message}")
 
-    # Metode untuk menampilkan pesan error jika data invalid
     def display_error(self, error_message):
         print(f"Error: {error_message}")
 
-    # Metode tambahan untuk validasi data form
     def validate_form_data(self, form_data):
         required_fields = ["EventID", "EventLocation", "EventDate", "EventStatus"]
         for field in required_fields:
