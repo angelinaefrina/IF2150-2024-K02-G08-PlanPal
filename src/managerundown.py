@@ -39,9 +39,9 @@ class ManageRundown(tk.Tk):
         self.end_time_entry = tk.Entry(input_frame)
         self.end_time_entry.grid(row=1, column=3, padx=5, pady=5)
 
-        tk.Label(input_frame, text="Duration").grid(row=0, column=4, padx=5, pady=5)
-        self.duration_entry = tk.Entry(input_frame)
-        self.duration_entry.grid(row=0, column=5, padx=5, pady=5)
+        # tk.Label(input_frame, text="Duration").grid(row=0, column=4, padx=5, pady=5)
+        # self.duration_entry = tk.Entry(input_frame)
+        # self.duration_entry.grid(row=0, column=5, padx=5, pady=5)
 
         tk.Label(input_frame, text="PIC").grid(row=1, column=4, padx=5, pady=5)
         self.pic_entry = tk.Entry(input_frame)

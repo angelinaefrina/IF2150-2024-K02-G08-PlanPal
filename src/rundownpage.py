@@ -3,6 +3,10 @@ class RundownPage:
         self.rundown_controller = rundown_controller
 
     def display_rundown(self, event_id):
+        if not self.rundown_controller.rundown_list:
+            print("No rundowns available to display.")
+            return
+
         self.arrange_rundown()
         rundown_found = False
         for rundown in self.rundown_controller.rundown_list:
@@ -23,5 +27,6 @@ class RundownPage:
         print("Error: Data rundown tidak ditemukan atau tidak valid.")
 
     def arrange_rundown(self):
-        self.rundown_controller.rundown_list.sort(key=lambda rundown: rundown.agenda_time_start)
-        print("Rundown has been arranged from the earliest to the latest time.")
+        if self.rundown_controller.rundown_list:
+            self.rundown_controller.rundown_list.sort(key=lambda rundown: rundown.agenda_time_start)
+            print("Rundown has been arranged from the earliest to the latest time.")
