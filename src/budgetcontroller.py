@@ -64,3 +64,14 @@ class ControllerBudget:
                 f"Quantity: {budget['RequirementQuantity']}, "
                 f"Total Cost: {total_cost}"
             )
+        
+    def get_all_budget_list(self):
+        return self.budget_database
+
+    def get_budget_list(self, event_id):
+        budgets = [budget for budget in self.budget_database if budget["EventID"] == event_id]
+        if budgets:
+            return budgets
+        else:
+            print(f"No budgets found for EventID {event_id}.")
+            return []
