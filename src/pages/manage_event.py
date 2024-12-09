@@ -130,6 +130,7 @@ class EventManagerApp:
         self.page.add(
             ft.Column(
                 [   
+                    ft.Text("All Events", font_family="Default_Bold", size=24, color="#4539B4"),
                     ft.Column(
                     controls=rows,
                     spacing=20,
