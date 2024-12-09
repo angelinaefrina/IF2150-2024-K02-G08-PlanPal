@@ -1,117 +1,348 @@
 import flet as ft
 from guestcontroller import GuestController
 
-# lanjut besok ya ef maaf gakuat ngantuk banget
+current_page = 1
+guests_per_page = 8
 
 def main(page: ft.Page):
-    page.title = "PlanPal - Daftar Tamu"
-    page.scroll = ft.ScrollMode.AUTO
-
+    mode = "default"  # Default UI mode
     guest_controller = GuestController()
-    current_page = 1
-    rows_per_page = 10
 
-    def refresh_table():
-        guest_table.rows.clear()
-        start_idx = (current_page - 1) * rows_per_page
-        end_idx = start_idx + rows_per_page
-        for guest in guest_controller.guest_list[start_idx:end_idx]:
-            guest_table.rows.append(
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(guest["GuestName"])),
-                        ft.DataCell(ft.Text(guest["RSVPStatus"])),
-                    ]
-                )
-            )
-        update_page_label()
-        page.update()
+    guest_list_container = ft.Container()
 
-    def update_page_label():
-        total_pages = max(1, -(-len(guest_controller.guest_list) // rows_per_page))
-        page_label.value = f"Page {current_page} of {total_pages}"
-        page.update()
+    page.bgcolor = "#FFF5E9"
 
-    def show_guest_form(edit_mode=False, guest_data=None):
-        def save_guest():
-            guest_name = guest_name_field.value.strip()
-            rsvp_status = rsvp_dropdown.value
-            if edit_mode:
-                guest_data["GuestName"] = guest_name
-                guest_data["RSVPStatus"] = rsvp_status
-            else:
-                guest_controller.add_guest_list(len(guest_controller.guest_list) + 1, guest_name, rsvp_status)
-            dialog.open = False
-            refresh_table()
-            page.update()
-
-        guest_name_field.value = guest_data["GuestName"] if guest_data else ""
-        rsvp_dropdown.value = guest_data["RSVPStatus"] if guest_data else "Accepted"
-        
-        # Adding save button that triggers save_guest on click
-        save_button = ft.TextButton("Simpan", on_click=save_guest)  
-        cancel_button = ft.TextButton("Batal", on_click=lambda e: dialog.close())
-        
-        dialog.content = ft.Column([guest_name_field, rsvp_dropdown, save_button, cancel_button])
-        dialog.open = True
-        page.update()
-
-
-    def delete_guest():
-        if len(guest_controller.guest_list) > 0:
-            guest_controller.guest_list.pop()
-            refresh_table()
-
-    # Components
-    guest_name_field = ft.TextField(label="Nama Tamu")
-    rsvp_dropdown = ft.Dropdown(
-        label="RSVP Status",
-        options=[
-            ft.dropdown.Option("Accepted"),
-            ft.dropdown.Option("Declined"),
-            ft.dropdown.Option("Pending"),
-        ],
-    )
-
-    # Adding guest_table, page_label, and dialog components
+    # Define table columns with adjusted spacing
     guest_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("Nama")),
-            ft.DataColumn(ft.Text("Status")),
+            ft.DataColumn(ft.Text(" "*50 + "Guest Name" + " "*50, color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text("RSVP Status" + " "*5, color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text(" ")),
+            ft.DataColumn(ft.Text(" "*50)),
         ],
         rows=[],
     )
 
-    page_label = ft.Text("Page 1 of 1")
+    def update_guest_list():
+        """Update the guest list table with pagination."""
+        start_index = (current_page - 1) * guests_per_page
+        end_index = start_index + guests_per_page
+        guests_to_display = guest_controller.guest_list[start_index:end_index]
 
-    dialog = ft.AlertDialog(
-        modal=True,
-        title=ft.Text("Detail Tamu"),
-        content=ft.Column([guest_name_field, rsvp_dropdown]),
-        actions=[
-            ft.TextButton("Simpan", on_click=save_guest()),
-            ft.TextButton("Batal", on_click=lambda e: setattr(dialog, "open", False)),
+        guest_table.rows = [
+            ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(" "*77 + guest["GuestName"], color="#4539B4")),
+                    ft.DataCell(ft.Text(" "*8 + guest["RSVPStatus"], color="#4539B4")),
+                    ft.DataCell(
+                        ft.IconButton(
+                            icon=ft.icons.EDIT,
+                            on_click=lambda e, idx=index: edit_guest(idx),
+                            bgcolor="#AAE1FF"
+                        ) if mode == "edit" else ft.Container()
+                    ),
+                    ft.DataCell(
+                        ft.IconButton(
+                            icon=ft.icons.DELETE,
+                            on_click=lambda e, idx=index: delete_guest(idx),
+                            bgcolor="#AAE1FF"
+                        ) if mode == "delete" else ft.Container()
+                    ),
+                ]
+            )
+            for index, guest in enumerate(guests_to_display)
+        ]
+        guest_list_container.content = guest_table
+        page.update()
+    
+    def previous_page(e):
+        """Go to the previous page."""
+        global current_page
+        if current_page > 1:
+            current_page -= 1
+            update_guest_list()
+            update_pagination_buttons()
+            page.update()
+
+    def next_page(e):
+        """Go to the next page."""
+        global current_page
+        if current_page < guests_per_page < len(guest_controller.guest_list) :
+            current_page += 1
+            update_guest_list()
+            update_pagination_buttons()
+            page.update()
+
+    def update_pagination_buttons():
+        """Update the pagination buttons."""
+        global current_page
+        pagination_text = f"Page {current_page} of {len(guest_controller.guest_list) // guests_per_page + 1}"
+        page.controls[1].text = pagination_text  # Update the pagination text control
+        page.update()  # Ensure the page is updated with the new text
+
+    previous_button = ft.ElevatedButton("Previous", on_click=previous_page)
+    next_button = ft.ElevatedButton("Next", on_click=next_page)
+
+    def update_ui():
+        """Update guest list UI."""
+        update_guest_list()
+        page.update()
+
+    def set_mode(new_mode):
+        """Change the UI mode."""
+        nonlocal mode
+        mode = new_mode
+        update_ui()
+
+    def add_guest(e):
+        """Show dialog to add a new guest."""
+        show_add_guest_dialog()
+
+    def show_add_guest_dialog():
+        """Display the Add Guest dialog."""
+        guest_name_input.value = ""  # Reset input field
+        rsvp_status_input.value = None  # Reset input field
+
+        # Reset the input fields to default state (no errors)
+        guest_name_input.border_color = ft.colors.BLACK
+        guest_name_input.helper_text = ""
+        guest_name_input.helper_text_color = ft.colors.TRANSPARENT
+        
+        rsvp_status_input.border_color = ft.colors.BLACK
+        rsvp_status_input.helper_text = ""
+        rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
+
+        add_guest_dialog = ft.AlertDialog(
+            title=ft.Text("Add Guest", color="#4539B4"),
+            content=ft.Column([guest_name_input, rsvp_status_input]),
+            actions=[
+                ft.TextButton("Cancel", on_click=lambda _: close_dialog(add_guest_dialog)),
+                ft.TextButton("Add", on_click=lambda _: validate_add_guest(add_guest_dialog))
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            bgcolor="#FFF5E9"
+        )
+        page.dialog = add_guest_dialog
+        add_guest_dialog.open = True
+        page.update()
+
+    def validate_add_guest(dialog):
+        """Validate input before adding a new guest."""
+        guest_name = guest_name_input.value.strip()
+        rsvp_status = rsvp_status_input.value
+
+        # Validasi jika input kosong dan ubah warna border menjadi merah
+        if not guest_name or not rsvp_status:
+            # Ubah border color menjadi merah jika input kosong
+            guest_name_input.border_color = ft.colors.RED
+            guest_name_input.helper_text = "This field is required!"
+            guest_name_input.helper_text_color = ft.colors.RED
+            if not rsvp_status:
+                rsvp_status_input.border_color = ft.colors.RED
+                rsvp_status_input.helper_text = "This field is required!"
+                rsvp_status_input.helper_text_color = ft.colors.RED
+
+            page.update()
+            return
+
+        # Proceed with confirmation dialog
+        show_confirmation_dialog(
+            title="Are you sure?",
+            content=f"Do you want to add guest '{guest_name}'?",
+            on_confirm=lambda: save_new_guest(dialog),
+            bgcolor="#FFF5E9"
+        )
+
+    def save_new_guest(dialog):
+        """Save a new guest."""
+        guest_name = guest_name_input.value.strip()
+        rsvp_status = rsvp_status_input.value
+        guest_controller.add_guest_list(guest_name, rsvp_status)
+        
+        # Reset form inputs
+        guest_name_input.border_color = ft.colors.BLACK
+        guest_name_input.helper_text = ""
+        guest_name_input.helper_text_color = ft.colors.TRANSPARENT
+        
+        rsvp_status_input.border_color = ft.colors.BLACK
+        rsvp_status_input.helper_text = ""
+        rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
+
+        close_dialog(dialog)
+        update_ui()
+
+    def edit_guest(index):
+        """Show dialog to edit a guest."""
+        guest = guest_controller.guest_list[index]
+        show_edit_guest_dialog(index, guest["GuestName"], guest["RSVPStatus"])
+
+    def show_edit_guest_dialog(index, guest_name, rsvp_status):
+        """Display the Edit Guest dialog."""
+        guest_name_input.value = guest_name
+        rsvp_status_input.value = rsvp_status
+
+        # Reset the input fields to default state (no errors)
+        guest_name_input.border_color = ft.colors.BLACK
+        guest_name_input.helper_text = ""
+        guest_name_input.helper_text_color = ft.colors.TRANSPARENT
+        
+        rsvp_status_input.border_color = ft.colors.BLACK
+        rsvp_status_input.helper_text = ""
+        rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
+
+        edit_guest_dialog = ft.AlertDialog(
+            title=ft.Text("Edit Guest"),
+            content=ft.Column([guest_name_input, rsvp_status_input]),
+            actions=[
+                ft.TextButton("Cancel", on_click=lambda _: close_dialog(edit_guest_dialog)),
+                ft.TextButton("Save", on_click=lambda _: validate_edit_guest(index, edit_guest_dialog)),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            bgcolor="#FFF5E9",
+        )
+        page.dialog = edit_guest_dialog
+        edit_guest_dialog.open = True
+        page.update()
+
+    def validate_edit_guest(index, dialog):
+        """Validate input before editing a guest."""
+        guest_name = guest_name_input.value.strip()
+        rsvp_status = rsvp_status_input.value
+
+        # Validasi jika input kosong dan ubah warna border menjadi merah
+        if not guest_name or not rsvp_status:
+            # Ubah border color menjadi merah jika input kosong
+            guest_name_input.border_color = ft.colors.RED
+            guest_name_input.helper_text = "This field is required!"
+            guest_name_input.helper_text_color = ft.colors.RED
+            if not rsvp_status:
+                rsvp_status_input.border_color = ft.colors.RED
+                rsvp_status_input.helper_text = "This field is required!"
+                rsvp_status_input.helper_text_color = ft.colors.RED
+
+            page.update()
+            return
+
+        # Proceed with confirmation dialog
+        show_confirmation_dialog(
+            title="Are you sure?",
+            content=f"Do you want to save changes for '{guest_name}'?",
+            on_confirm=lambda: save_edited_guest(index, dialog),
+            bgcolor="#FFF5E9",
+        )
+
+    def save_edited_guest(index, dialog):
+        """Save the edited guest."""
+        guest_name = guest_name_input.value.strip()
+        rsvp_status = rsvp_status_input.value
+        guest_controller.edit_guest_list(guest_controller.guest_list[index]["GuestID"], guest_name, rsvp_status)
+
+        # Reset form inputs
+        guest_name_input.border_color = ft.colors.BLACK
+        guest_name_input.helper_text = ""
+        guest_name_input.helper_text_color = ft.colors.TRANSPARENT
+        
+        rsvp_status_input.border_color = ft.colors.BLACK
+        rsvp_status_input.helper_text = ""
+        rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
+
+        close_dialog(dialog)
+        update_ui()
+
+    def delete_guest(index):
+        """Delete a guest."""
+        guest = guest_controller.guest_list[index]
+        show_confirmation_dialog(
+            title="Are you sure?",
+            content=f"Do you want to delete '{guest['GuestName']}'?",
+            on_confirm=lambda: confirm_delete_guest(index),
+            bgcolor="#FFF5E9",
+        )
+
+    def confirm_delete_guest(index):
+        """Confirm deletion of a guest."""
+        guest_controller.delete_guest_list(guest_controller.guest_list[index]["GuestID"])
+        update_ui()
+
+    def show_confirmation_dialog(title, content, on_confirm,bgcolor):
+        """Display a confirmation dialog."""
+        confirmation_dialog = ft.AlertDialog(
+            title=ft.Text(title, color="#4539B4"),
+            content=ft.Text(content, color="#4539B4"),
+            actions=[
+                ft.TextButton("No", on_click=lambda _: close_dialog(confirmation_dialog)),
+                ft.TextButton("Yes", on_click=lambda _: (
+                    close_dialog(confirmation_dialog),
+                    on_confirm(),
+                )),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            bgcolor=bgcolor,
+        )
+        page.dialog = confirmation_dialog
+        confirmation_dialog.open = True
+        page.update()
+
+    def close_dialog(dialog):
+        """Close a dialog."""
+        dialog.open = False
+        page.update()
+
+    # Input components
+    guest_name_input = ft.TextField(label="Guest Name", autofocus=True)
+    rsvp_status_input = ft.Dropdown(
+        label="RSVP Status",
+        options=[
+            ft.dropdown.Option("Hadir"),
+            ft.dropdown.Option("Tidak Hadir"),
+            ft.dropdown.Option("Menyusul"),
         ],
     )
 
-    # Adding components to the page
+    # Main UI
     page.add(
-        ft.Column(
-            [
-                ft.Row([ft.Text("Daftar Tamu", style="headlineMedium"), page_label]),
-                guest_table,
-                ft.Row(
-                    [
-                        ft.FilledButton("Tambah", on_click=lambda e: show_guest_form(edit_mode=False)),
-                        ft.FilledButton("Edit", on_click=lambda e: print("Edit not yet implemented")),
-                        ft.FilledButton("Hapus", on_click=delete_guest),
-                    ],
-                    alignment="spaceEvenly",
+        ft.Column([
+            ft.Container(
+                content=ft.Text(
+                    "PlanPal", size=40, weight=ft.FontWeight.BOLD,color="#FFF5E9"
                 ),
-            ]
-        ),
-        dialog,
+                bgcolor="#4539B4",  # Warna latar belakang biru
+                padding=ft.padding.symmetric(horizontal=16, vertical=6),  # Memberikan padding
+                alignment=ft.alignment.center_left,
+                expand=True # Membuatnya meluas ke seluruh lebar layar
+            ),
+            ft.Row([
+                ft.Text("Daftar Tamu", size=30, weight=ft.FontWeight.BOLD, color="#4539B4"),
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Row([
+                ft.ElevatedButton(
+                    content=ft.Text("Tambah", weight=ft.FontWeight.BOLD, color="#4539B4"),
+                    on_click=add_guest
+                ),
+                ft.ElevatedButton(
+                    content=ft.Text("Edit Mode", weight=ft.FontWeight.BOLD, color="#4539B4"),
+                    on_click=lambda _: set_mode("edit")
+                ),
+                ft.ElevatedButton(
+                    content=ft.Text("Hapus Mode", weight=ft.FontWeight.BOLD, color="#4539B4"),
+                    on_click=lambda _: set_mode("delete")
+                ),
+                ft.ElevatedButton(
+                    content=ft.Text("Default Mode", weight=ft.FontWeight.BOLD, color="#4539B4"),
+                    on_click=lambda _: set_mode("default")
+                ),
+            ]),
+            ft.Divider(),
+            guest_list_container,
+            ft.Row([
+                previous_button,
+                ft.Text(f"Page {current_page} of {len(guest_controller.guest_list) // guests_per_page + 1}", size=12),
+                next_button,
+            ], alignment=ft.MainAxisAlignment.CENTER),
+        ])
     )
 
-    # Initialize the table on the first load
-    refresh_table()
+    # Initial render
+    update_ui()
+
+ft.app(target=main)
