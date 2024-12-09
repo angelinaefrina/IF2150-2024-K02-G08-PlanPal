@@ -1,37 +1,6 @@
 class GuestController:
     def __init__(self):
         self.guest_list = []
-
-    def add_guest_list(self, guest_id, guest_name, rsvp_status):
-        if self.validate_guest_list(guest_id, guest_name, rsvp_status):
-            new_guest = {
-                "GuestID": guest_id,
-                "GuestName": guest_name,
-                "RSVPStatus": rsvp_status
-            }
-            self.guest_list.append(new_guest)
-            print(f"Tamu dengan ID {guest_id} berhasil ditambahkan.")
-        else:
-            print("Data tamu tidak valid. Penambahan tamu dibatalkan.")
-
-    def validate_guest_list(self, guest_id, guest_name, rsvp_status):
-        if not isinstance(guest_id, int) or guest_id <= 0:
-            print("GuestID harus berupa angka positif.")
-            return False
-        if not isinstance(guest_name, str) or not guest_name.strip():
-            print("GuestName harus berupa string non-kosong.")
-            return False
-        if rsvp_status not in ["Accepted", "Declined", "Pending"]:
-            print("RSVPStatus harus salah satu dari: Accepted, Declined, Pending.")
-            return False
-        if any(guest["GuestID"] == guest_id for guest in self.guest_list):
-            print(f"GuestID {guest_id} sudah ada dalam daftar.")
-            return False
-
-        return True
-class GuestController:
-    def __init__(self):
-        self.guest_list = []
         self._next_guest_id = 1  # Start ID from 1
 
     def add_guest_list(self, guest_name, rsvp_status):
