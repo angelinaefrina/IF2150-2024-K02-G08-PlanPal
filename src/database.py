@@ -40,7 +40,12 @@ class EventDatabase(Database):
         parameters = (event_location, event_date, event_status)
         self.execute_query(query, parameters)
 
-# ------------------------------ Tabel GuestList ------------------------------
+    def get_all_vendors(self):
+        query = """
+        SELECT * FROM Event
+        """
+        return self.fetch_query(query)
+
 class GuestListDatabase(Database):
     def create_guest_list_table(self):
         query = """
@@ -68,6 +73,12 @@ class GuestListDatabase(Database):
         """
         return self.fetch_query(query, (event_id,))
 
+    def get_all_vendors(self):
+        query = """
+        SELECT * FROM GuestList
+        """
+        return self.fetch_query(query)
+
 class BudgetDatabase(Database):
     def create_budget_table(self):
         query = """
@@ -94,6 +105,12 @@ class BudgetDatabase(Database):
         SELECT * FROM Budget WHERE EventID = ?
         """
         return self.fetch_query(query, (event_id,))
+    
+    def get_all_vendors(self):
+        query = """
+        SELECT * FROM Budget
+        """
+        return self.fetch_query(query)
 
 class VendorDatabase(Database):
     def create_vendor_table(self):
@@ -137,6 +154,12 @@ class VendorDatabase(Database):
         SELECT * FROM Vendor WHERE EventID = ?
         """
         return self.fetch_query(query, (event_id,))
+    
+    def get_all_vendors(self):
+        query = """
+        SELECT * FROM Vendor
+        """
+        return self.fetch_query(query)
 
 class RundownDatabase(Database):
     def create_rundown_table(self):
@@ -165,6 +188,12 @@ class RundownDatabase(Database):
         SELECT * FROM Rundown WHERE EventID = ?
         """
         return self.fetch_query(query, (event_id,))
+    
+    def get_all_vendors(self):
+        query = """
+        SELECT * FROM Rundown
+        """
+        return self.fetch_query(query)
 
 if __name__ == "__main__":
     database_name = "planpal.db"

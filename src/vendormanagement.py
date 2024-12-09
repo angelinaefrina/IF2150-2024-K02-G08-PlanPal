@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from database import add_vendor, update_vendor, delete_vendor, get_vendor_by_event, get_all_vendors
+from database import VendorDatabase as vdb
 
 class VendorManagement:
     def __init__(self, root):
@@ -39,7 +39,7 @@ class VendorManagement:
 
     def load(self):
         self.vendor_listbox.delete(0, tk.END)
-        vendors = get_all_vendors()
+        vendors = vdb.get_all_vendors()
         for vendor in vendors:
             display_text = f"Event ID: {vendor[0]}, Name: {vendor[1]}, Contact: {vendor[2]}, Product: {vendor[3]}"
             self.vendor_listbox.insert(tk.END, display_text)
@@ -50,7 +50,7 @@ class VendorManagement:
             vendor_name = self.vendor_name_entry.get()
             vendor_contact = self.vendor_contact_entry.get()
             vendor_product = self.vendor_product_entry.get()
-            add_vendor(event_id, vendor_name, vendor_contact, vendor_product)
+            vdb.add_vendor(event_id, vendor_name, vendor_contact, vendor_product)
             messagebox.showinfo("Success", "Vendor added successfully")
             self.load_vendor_list()
         except Exception as e:
@@ -62,7 +62,7 @@ class VendorManagement:
             vendor_name = self.vendor_name_entry.get()
             vendor_contact = self.vendor_contact_entry.get()
             vendor_product = self.vendor_product_entry.get()
-            update_vendor(event_id, vendor_name, vendor_contact, vendor_product)
+            vdb.update_vendor(event_id, vendor_name, vendor_contact, vendor_product)
             messagebox.showinfo("Success", "Vendor updated successfully")
             self.load_vendor_list()
         except Exception as e:
@@ -71,7 +71,7 @@ class VendorManagement:
     def hapus(self):
         try:
             event_id = int(self.event_id_entry.get())
-            delete_vendor(event_id)
+            vdb.delete_vendor(event_id)
             messagebox.showinfo("Success", "Vendor deleted successfully")
             self.load_vendor_list()
         except Exception as e:
@@ -80,7 +80,7 @@ class VendorManagement:
     def lihat(self):
         try:
             event_id = int(self.event_id_entry.get())
-            vendor = get_vendor_by_event(event_id)
+            vendor = vdb.get_vendor_by_event(event_id)
             if vendor:
                 self.vendor_name_entry.delete(0, tk.END)
                 self.vendor_name_entry.insert(0, vendor[1])
@@ -95,5 +95,5 @@ class VendorManagement:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = VendorManagementApp(root)
+    app = VendorManagement(root)
     root.mainloop()
