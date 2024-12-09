@@ -10,10 +10,10 @@ class BudgetForm:
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Budget" if is_edit else "Add Budget"),
             content=ft.Column([
-                ft.TextField(label="Event ID", value=budget_data["EventID"] if budget_data else "", on_change=self.validate_integer),
-                ft.TextField(label="Requirement Name", value=budget_data["RequirementName"] if budget_data else ""),
-                ft.TextField(label="Budget per Unit", value=str(budget_data["RequirementBudget"]) if budget_data else ""),
-                ft.TextField(label="Quantity", value=str(budget_data["RequirementQuantity"]) if budget_data else ""),
+                ft.TextField(label="Event ID", value=budget_data["EventID"], color= "#4539B4" if budget_data else "", on_change=self.validate_integer),
+                ft.TextField(label="Requirement Name", value=budget_data["RequirementName"], color= "#4539B4" if budget_data else ""),
+                ft.TextField(label="Budget per Unit", value=str(budget_data["RequirementBudget"]), color= "#4539B4" if budget_data else ""),
+                ft.TextField(label="Quantity", value=str(budget_data["RequirementQuantity"]), color= "#4539B4" if budget_data else ""),
             ]),
             actions=[
                 ft.TextButton("Submit", on_click=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
@@ -32,12 +32,18 @@ class BudgetForm:
         e.control.update()
 
     def submit_form(self, page, on_submit, is_edit, original_event_id):
-        print("Submitting form")
+        """Handle form submission by validating and passing data to the controller."""
+        print("Submitting form...")
         try:
+            # Collecting values from the form
             event_id = self.dialog.content.controls[0].value
-            if not event_id.isdigit():
-                raise ValueError("Event ID must be a number.")
-            
+            if isinstance(event_id, int):
+                pass
+            elif event_id.isdigit():
+                event_id = int(event_id)  # Convert it to an integer if it's a string
+            else:
+                raise ValueError("Event ID must be a valid number.")
+
             form_data = {
                 "EventID": int(event_id),
                 "RequirementName": self.dialog.content.controls[1].value,
@@ -45,15 +51,26 @@ class BudgetForm:
                 "RequirementQuantity": int(self.dialog.content.controls[3].value),
             }
 
+            # Validate the form data
             if self.validate_form_data(form_data):
-                self.budget_details = form_data
-                self.close_dialog(page)  
+                self.budget_details = form_data  # Store the form data
+
+                # Close the dialog once the data is valid
+                self.close_dialog(page)
                 print("Form data is valid, calling on_submit")
-                on_submit(form_data, is_edit, original_event_id)
+
+                # If editing, we update the existing entry; if adding, we add a new entry
+                if is_edit:
+                    print(f"Editing budget for EventID: {original_event_id}")
+                    on_submit(form_data, is_edit, original_event_id)  # Update existing entry
+                else:
+                    print("Adding new budget")
+                    on_submit(form_data, is_edit, original_event_id=None)  # Add new entry
             else:
                 self.display_error_message("Form data is invalid.")
         except ValueError as e:
             self.display_error_message(str(e))
+
 
     def close_dialog(self, page):
         self.dialog.open = False  

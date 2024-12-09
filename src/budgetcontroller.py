@@ -15,23 +15,16 @@ class ControllerBudget:
         else:
             print("Data anggaran tidak valid. Penambahan dibatalkan.")
 
-    def edit_budget(self, event_id, requirement_name, new_budget=None, new_quantity=None):
+    def edit_budget(self, original_event_id, requirement_name, requirement_budget, requirement_quantity):
+        # Find the budget entry to update
         for budget in self.budget_database:
-            if budget["EventID"] == event_id and budget["RequirementName"] == requirement_name:
-                if new_budget is not None:
-                    if new_budget < 0:
-                        print("Anggaran tidak boleh bernilai negatif. Perubahan dibatalkan.")
-                        return
-                    budget["RequirementBudget"] = new_budget
-                if new_quantity is not None:
-                    if new_quantity <= 0:
-                        print("Kuantitas harus lebih besar dari 0. Perubahan dibatalkan.")
-                        return
-                    budget["RequirementQuantity"] = new_quantity
-                print(f"Anggaran untuk {requirement_name} pada event {event_id} berhasil diperbarui.")
-                return
-        print(f"Anggaran untuk {requirement_name} pada event {event_id} tidak ditemukan.")
-
+            if budget["EventID"] == original_event_id:
+                budget["RequirementName"] = requirement_name
+                budget["RequirementBudget"] = requirement_budget
+                budget["RequirementQuantity"] = requirement_quantity
+                print(f"Updated budget: {budget}")
+                break
+    
     def delete_budget(self, event_id, requirement_name):
         for budget in self.budget_database:
             if budget["EventID"] == event_id and budget["RequirementName"] == requirement_name:
@@ -75,3 +68,22 @@ class ControllerBudget:
         else:
             print(f"No budgets found for EventID {event_id}.")
             return []
+        
+'''
+    def edit_budget(self, event_id, requirement_name, new_budget=None, new_quantity=None):
+        for budget in self.budget_database:
+            if budget["EventID"] == event_id and budget["RequirementName"] == requirement_name:
+                if new_budget is not None:
+                    if new_budget < 0:
+                        print("Anggaran tidak boleh bernilai negatif. Perubahan dibatalkan.")
+                        return
+                    budget["RequirementBudget"] = new_budget
+                if new_quantity is not None:
+                    if new_quantity <= 0:
+                        print("Kuantitas harus lebih besar dari 0. Perubahan dibatalkan.")
+                        return
+                    budget["RequirementQuantity"] = new_quantity
+                print(f"Anggaran untuk {requirement_name} pada event {event_id} berhasil diperbarui.")
+                return
+        print(f"Anggaran untuk {requirement_name} pada event {event_id} tidak ditemukan.")
+'''
