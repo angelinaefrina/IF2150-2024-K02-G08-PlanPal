@@ -1,43 +1,37 @@
-class GuestListForm:
-    def __init__(self, guest_list=None):
-        self.guest_list = guest_list if guest_list else []
+import flet as ft
 
-    def display_guest_list(self):
-        if not self.guest_list:
-            self.display_error_message("Daftar tamu kosong.")
-            return
-        print("Daftar Tamu:")
-        for guest in self.guest_list:
-            print(f"- GuestID: {guest['GuestID']}, Name: {guest['GuestName']}, RSVPStatus: {guest['RSVPStatus']}")
+class GuestListForm(ft.UserControl):
+    def __init__(self, add_guest_callback, edit_guest_callback, delete_guest_callback):
+        super().__init__()
+        self.add_guest_callback = add_guest_callback
+        self.edit_guest_callback = edit_guest_callback
+        self.delete_guest_callback = delete_guest_callback
 
-    def display_edit_guest_list(self):
-        if not self.guest_list:
-            self.display_error_message("Tidak ada tamu yang dapat diubah.")
-            return
-        try:
-            guest_id = int(input("Masukkan GuestID tamu yang ingin diubah: "))
-            guest = next((g for g in self.guest_list if g["GuestID"] == guest_id), None)
-            if not guest:
-                self.display_error(f"Tamu dengan GuestID {guest_id} tidak ditemukan.")
-                return
-            print(f"Detail tamu saat ini: Name: {guest['GuestName']}, RSVPStatus: {guest['RSVPStatus']}")
-            new_name = input("Masukkan nama baru (tekan Enter untuk tidak mengubah): ").strip()
-            new_rsvp_status = input("Masukkan RSVPStatus baru (Accepted/Declined/Pending, tekan Enter untuk tidak mengubah): ").strip()
-            if new_name:
-                guest["GuestName"] = new_name
-            if new_rsvp_status:
-                if new_rsvp_status in ["Accepted", "Declined", "Pending"]:
-                    guest["RSVPStatus"] = new_rsvp_status
-                else:
-                    self.display_error("RSVPStatus tidak valid. Perubahan dibatalkan.")
-                    return
+    def build(self):
+        self.guest_name_input = ft.TextField(label="Nama Tamu", autofocus=True)
+        self.rsvp_status_input = ft.Dropdown(options=["Hadir", "Tidak Hadir", "Menyusul"], label="RSVP Status")
+        self.add_button = ft.ElevatedButton("Tambah Tamu", on_click=self.add_guest)
+        self.edit_button = ft.ElevatedButton("Edit Tamu", on_click=self.edit_guest)
+        self.delete_button = ft.ElevatedButton("Hapus Tamu", on_click=self.delete_guest)
 
-            print(f"Tamu dengan GuestID {guest_id} berhasil diperbarui.")
-        except ValueError:
-            self.display_error("Input harus berupa angka.")
+        return ft.Column([
+            self.guest_name_input,
+            self.rsvp_status_input,
+            self.add_button,
+            self.edit_button,
+            self.delete_button,
+        ])
 
-    def display_error_message(self, message):
-        print(f"Error: {message}")
+    def add_guest(self, e):
+        guest_name = self.guest_name_input.value
+        rsvp_status = self.rsvp_status_input.value
+        self.add_guest_callback(self.page, guest_name, rsvp_status)
 
-    def display_error(self, message):
-        print(f"Error: {message}")
+    def edit_guest(self, e):
+        guest_name = self.guest_name_input.value
+        rsvp_status = self.rsvp_status_input.value
+        self.edit_guest_callback(self.page, guest_name, rsvp_status)
+
+    def delete_guest(self, e):
+        guest_name = self.guest_name_input.value
+        self.delete_guest_callback(self.page, guest_name)
