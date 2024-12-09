@@ -6,7 +6,7 @@ class GuestList:
         self._guest_id = GuestList.guest_counter
         self.set_guest_name(guest_name)
         self.set_rsvp_status(rsvp_status)
-        GuestList.guest_counter += 1  # Meningkatkan ID tamu setiap kali tamu baru ditambahkan
+        GuestList.guest_counter += 1 
 
     def get_guest_id(self):
         return self._guest_id
