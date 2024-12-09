@@ -1,4 +1,5 @@
 import flet as ft
+from utils.buttons import *
 
 class FormEvent:
     def __init__(self):
@@ -24,8 +25,8 @@ class FormEvent:
                 ),
             ]),
             actions=[
-                ft.TextButton("Submit", on_click=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
-                ft.TextButton("Cancel", on_click=lambda e: self.close_dialog(page))
+                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                CancelButton(on_click_action=lambda e: self.close_dialog(page))
             ]
         )
         page.dialog = self.dialog  # Set the dialog on the page
