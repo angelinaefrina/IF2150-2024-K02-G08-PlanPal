@@ -13,9 +13,9 @@ class EventManagerApp:
         self.event_display = EventDisplay(self.controller.get_event_list())
         self.form_event = FormEvent()
         
-        self.controller.add_event(1, "Location A", "2023-10-01", "Belum dimulai")
-        self.controller.add_event(2, "Location B", "2023-10-02", "Sedang berlangsung")
-        self.controller.add_event(3, "Location C", "2023-10-03", "Sudah selesai")
+        self.controller.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
+        self.controller.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
+        self.controller.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
         self.event_display.event_list = self.controller.get_event_list()
         
         self.create_widgets()
@@ -25,6 +25,7 @@ class EventManagerApp:
         self.tree = ft.DataTable(
             columns=[
                 ft.DataColumn(ft.Text("Event ID")),
+                ft.DataColumn(ft.Text("Event Name")),
                 ft.DataColumn(ft.Text("Location")),
                 ft.DataColumn(ft.Text("Date")),
                 ft.DataColumn(ft.Text("Status")),
@@ -66,6 +67,7 @@ class EventManagerApp:
                 ft.DataRow(
                     cells=[
                         ft.DataCell(ft.Text(event["EventID"])),
+                        ft.DataCell(ft.Text(event["EventName"])),
                         ft.DataCell(ft.Text(event["EventLocation"])),
                         ft.DataCell(ft.Text(event["EventDate"])),
                         ft.DataCell(ft.Text(event["EventStatus"])),
@@ -92,6 +94,7 @@ class EventManagerApp:
                     self.controller.delete_event(original_event_id)
                     self.controller.add_event(
                         form_data["EventID"],
+                        form_data["EventName"],
                         form_data["EventLocation"],
                         form_data["EventDate"],
                         form_data["EventStatus"]
@@ -102,6 +105,7 @@ class EventManagerApp:
                 else:
                     self.controller.add_event(
                         form_data["EventID"],
+                        form_data["EventName"],
                         form_data["EventLocation"],
                         form_data["EventDate"],
                         form_data["EventStatus"]

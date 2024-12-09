@@ -10,6 +10,7 @@ class FormEvent:
             title=ft.Text("Edit Event" if is_edit else "Add Event"),
             content=ft.Column([
                 ft.TextField(label="Event ID", value=event_data["EventID"] if event_data else "", on_change=self.validate_integer),
+                ft.TextField(label="Event Name", value=event_data["EventName"] if event_data else ""),
                 ft.TextField(label="Event Location", value=event_data["EventLocation"] if event_data else ""),
                 ft.TextField(label="Event Date (YYYY-MM-DD)", value=event_data["EventDate"] if event_data else ""),
                 ft.Dropdown(
@@ -42,14 +43,15 @@ class FormEvent:
         print("Submitting form")
         try:
             event_id = self.dialog.content.controls[0].value
-            if not event_id.isdigit():
-                raise ValueError("Event ID harus berupa angka.")
+            # if not event_id.isdigit():
+            #     raise ValueError("Event ID harus berupa angka.")
             
             form_data = {
                 "EventID": int(event_id),
-                "EventLocation": self.dialog.content.controls[1].value,
-                "EventDate": self.dialog.content.controls[2].value,
-                "EventStatus": self.dialog.content.controls[3].value
+                "EventName": self.dialog.content.controls[1].value,
+                "EventLocation": self.dialog.content.controls[2].value,
+                "EventDate": self.dialog.content.controls[3].value,
+                "EventStatus": self.dialog.content.controls[4].value
             }
             if self.validate_form_data(form_data):
                 self.event_details = form_data
@@ -70,7 +72,7 @@ class FormEvent:
         self.dialog.update()
 
     def validate_form_data(self, form_data):
-        required_fields = ["EventID", "EventLocation", "EventDate", "EventStatus"]
+        required_fields = ["EventID", "EventName", "EventLocation", "EventDate", "EventStatus"]
         for field in required_fields:
             if field not in form_data or not form_data[field]:
                 self.display_error_message(f"Field '{field}' tidak boleh kosong.")
