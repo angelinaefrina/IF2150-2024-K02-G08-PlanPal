@@ -1,6 +1,9 @@
 import flet as ft
 from guestcontroller import GuestController
 
+# FILE FIX NYA YANG DI guestFletv2.py
+# BUKAN YANG INI YA GAJADI YG INI, MAU DIHAPUS SAYANG TAKUT MASIH ADA YG MAU DI COPAS DARI SINI HEHE
+
 current_page = 1
 guests_per_page = 8
 

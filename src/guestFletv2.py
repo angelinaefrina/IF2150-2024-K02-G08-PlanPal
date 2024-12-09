@@ -13,8 +13,8 @@ def main(page: ft.Page):
     # Define table columns
     guest_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text(" "*50 + "Guest Name", color="#4539B4", size=20)),
-            ft.DataColumn(ft.Text(" "*50 + "RSVP Status", color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text(" "*50 + "Nama Tamu", color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text(" "*50 + "Status RSVP", color="#4539B4", size=20)),
             ft.DataColumn(ft.Text(" "*50)),
         ],
         rows=[],
@@ -104,11 +104,11 @@ def main(page: ft.Page):
         rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
 
         add_guest_dialog = ft.AlertDialog(
-            title=ft.Text("Add Guest", color="#4539B4"),
+            title=ft.Text("Tambah Tamu", color="#4539B4"),
             content=ft.Column([guest_name_input, rsvp_status_input]),
             actions=[
-                ft.TextButton("Cancel", on_click=lambda _: close_dialog(add_guest_dialog)),
-                ft.TextButton("Add", on_click=lambda _: validate_add_guest(add_guest_dialog)),
+                ft.TextButton("Keluar", on_click=lambda _: close_dialog(add_guest_dialog)),
+                ft.TextButton("Tambah", on_click=lambda _: validate_add_guest(add_guest_dialog)),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#FFF5E9",
@@ -138,8 +138,8 @@ def main(page: ft.Page):
 
         # Proceed with confirmation dialog
         show_confirmation_dialog(
-            title="Are you sure?",
-            content=f"Do you want to add guest '{guest_name}'?",
+            title="Tambah Tamu",
+            content=f"Yakin ingin menambahkan tamu '{guest_name}'?",
             on_confirm=lambda: save_new_guest(dialog),
             bgcolor="#FFF5E9"
         )
@@ -182,11 +182,11 @@ def main(page: ft.Page):
         rsvp_status_input.helper_text_color = ft.colors.TRANSPARENT
 
         edit_guest_dialog = ft.AlertDialog(
-            title=ft.Text("Edit Guest"),
+            title=ft.Text("Edit Tamu"),
             content=ft.Column([guest_name_input, rsvp_status_input]),
             actions=[
-                ft.TextButton("Cancel", on_click=lambda _: close_dialog(edit_guest_dialog)),
-                ft.TextButton("Save", on_click=lambda _: validate_edit_guest(index, edit_guest_dialog)),
+                ft.TextButton("Keluar", on_click=lambda _: close_dialog(edit_guest_dialog)),
+                ft.TextButton("Simpan", on_click=lambda _: validate_edit_guest(index, edit_guest_dialog)),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#FFF5E9",
@@ -216,8 +216,8 @@ def main(page: ft.Page):
 
         # Proceed with confirmation dialog
         show_confirmation_dialog(
-            title="Are you sure?",
-            content=f"Do you want to save changes for '{guest_name}'?",
+            title="Edit Tamu",
+            content=f"Yakin ingin menyimpan perubahan tamu '{guest_name}'?",
             on_confirm=lambda: save_edited_guest(index, dialog),
             bgcolor="#FFF5E9",
         )
@@ -244,8 +244,8 @@ def main(page: ft.Page):
         """Delete a guest."""
         guest = guest_controller.guest_list[index]
         show_confirmation_dialog(
-            title="Are you sure?",
-            content=f"Do you want to delete '{guest['GuestName']}'?",
+            title="Hapus Tamu",
+            content=f"Yakin ingin menghapus tamu '{guest['GuestName']}'?",
             on_confirm=lambda: confirm_delete_guest(index),
             bgcolor="#FFF5E9",
         )
@@ -261,8 +261,8 @@ def main(page: ft.Page):
             title=ft.Text(title, color="#4539B4"),
             content=ft.Text(content, color="#4539B4"),
             actions=[
-                ft.TextButton("No", on_click=lambda _: close_dialog(confirmation_dialog)),
-                ft.TextButton("Yes", on_click=lambda _: (
+                ft.TextButton("Tidak", on_click=lambda _: close_dialog(confirmation_dialog)),
+                ft.TextButton("Ya", on_click=lambda _: (
                     close_dialog(confirmation_dialog),
                     on_confirm(),
                 )),
@@ -280,9 +280,9 @@ def main(page: ft.Page):
         page.update()
 
     # Input components
-    guest_name_input = ft.TextField(label="Guest Name", autofocus=True)
+    guest_name_input = ft.TextField(label="Nama Tamu", autofocus=True)
     rsvp_status_input = ft.Dropdown(
-        label="RSVP Status",
+        label="Status RSVP",
         options=[
             ft.dropdown.Option("Hadir"),
             ft.dropdown.Option("Tidak Hadir"),
