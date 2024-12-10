@@ -83,6 +83,13 @@ class EventManagerApp:
         else:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
+    def view_event(self, event_id):
+        event_data = self.controller.get_event_details(event_id)
+        if event_data:
+            self.form_event.display_form(self.page, self.on_form_submit, event_data, is_edit=False, original_event_id=event_id)
+        else:
+            self.show_error_dialog(f"Event with ID '{event_id}' not found.")
+
     def update_display(self):
         total_pages = len(self.event_display.event_list) // ITEMS_PER_PAGE + (1 if len(self.event_display.event_list) % ITEMS_PER_PAGE > 0 else 0)
 
@@ -183,6 +190,7 @@ class EventManagerApp:
                         form_data["EventDate"],
                         form_data["EventStatus"]
                     )
+                    self.show_success_dialog("Event updated successfully!")
             else:
                 if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
                     self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
@@ -194,6 +202,7 @@ class EventManagerApp:
                         form_data["EventDate"],
                         form_data["EventStatus"]
                     )
+                    self.show_success_dialog("Event added successfully!")
             self.update_display()
 
     def show_error_dialog(self, message):
@@ -206,7 +215,21 @@ class EventManagerApp:
         error_dialog.open = True
         self.page.update()
 
+    def show_success_dialog(self, message):
+        success_dialog = ft.AlertDialog(
+            title=ft.Text("Success"),
+            content=ft.Text(message),
+            actions=[ft.TextButton("OK", on_click=lambda e: self.close_success_dialog())]
+        )
+        self.page.dialog = success_dialog
+        success_dialog.open = True
+        self.page.update()
+
     def close_error_dialog(self):
+        self.page.dialog.open = False
+        self.page.update()
+
+    def close_success_dialog(self):
         self.page.dialog.open = False
         self.page.update()
 
