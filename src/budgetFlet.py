@@ -29,18 +29,24 @@ class BudgetManagerApp:
                 ft.DataColumn(ft.Text("")),
             ],
             rows=[],
+            expand=True
         )
         self.title = ft.Text("Anggaran", size=30, weight=ft.FontWeight.BOLD, color= "#4539B4")
-        self.add_button = ft.ElevatedButton(text="Add Budget", color= "#4539B4", on_click=self.add_budget)
+        self.add_button = ft.ElevatedButton(text="Add Budget", color= "#4539B4", bgcolor=ft.colors.LIGHT_BLUE_100, on_click=self.add_budget)
         self.page.add(
-            ft.Column(
-                controls=[
-                    self.title,
-                    self.add_button,
-                    self.tree  # Add the table below the button
-                ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Center horizontally
+        ft.Column(
+            controls=[
+                self.title,
+                self.add_button,
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Center horizontally
             )
+        )
+        self.page.add(ft.Column(
+            controls=[
+                self.tree,
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
         )
     def add_budget(self, e):
         self.budget_form.display_form(self.page, self.on_form_submit, is_edit=False)
@@ -64,10 +70,10 @@ class BudgetManagerApp:
             self.tree.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(budget["EventID"])),
-                        ft.DataCell(ft.Text(budget["RequirementName"])),
-                        ft.DataCell(ft.Text(budget["RequirementBudget"])),
-                        ft.DataCell(ft.Text(budget["RequirementQuantity"])),
+                        ft.DataCell(ft.Text(budget["EventID"], color=ft.colors.BLACK)),
+                        ft.DataCell(ft.Text(budget["RequirementName"], color=ft.colors.BLACK)),
+                        ft.DataCell(ft.Text(budget["RequirementBudget"], color=ft.colors.BLACK)),
+                        ft.DataCell(ft.Text(budget["RequirementQuantity"], color=ft.colors.BLACK)),
                         ft.DataCell(ft.Text(total_cost)),
                         ft.DataCell(
                             ft.Row(
@@ -75,11 +81,13 @@ class BudgetManagerApp:
                                     ft.ElevatedButton(
                                         text="Edit", 
                                         color= "#4539B4",
+                                        bgcolor=ft.colors.LIGHT_BLUE_100,
                                         on_click=lambda e, event_id=budget["EventID"], requirement_name=budget["RequirementName"]: self.edit_budget(event_id, requirement_name)
                                     ),
                                     ft.ElevatedButton(
                                         text="Delete", 
                                         color= "#4539B4",
+                                        bgcolor=ft.colors.LIGHT_BLUE_100,
                                         on_click=lambda e, event_id=budget["EventID"], requirement_name=budget["RequirementName"]: self.delete_budget(event_id, requirement_name)
                                     ),
                                 ]
