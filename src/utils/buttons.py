@@ -27,7 +27,29 @@ class CreateNewEvent(ft.Container):
             ),
             on_click=on_click_action,
         )
-        
+
+class CreateNewBudget(ft.Container):
+    def __init__(self, width=1000, height=50, on_click_action=None, font_family=None):
+        super().__init__()
+        self.width = width
+        self.height = height
+
+        # Button for creating new events
+        self.content = ft.ElevatedButton(
+            text="Tambah Anggaran Baru",
+            style=ft.ButtonStyle(
+                padding=ft.padding.symmetric(horizontal=50, vertical=20),
+                bgcolor="#C4E8F8",
+                shape=ft.RoundedRectangleBorder(radius=6),
+                text_style=ft.TextStyle(
+                    color="#4539B4",
+                    weight=ft.FontWeight.BOLD,
+                    font_family=font_family,
+                    size=26,
+                )
+            ),
+            on_click=on_click_action,
+        )
 
 class EditButton(ft.IconButton):
     def __init__(self, icon_color = "#4539B4", icon_size = 24, on_click_action = None):

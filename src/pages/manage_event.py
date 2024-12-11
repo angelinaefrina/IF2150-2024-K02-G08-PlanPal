@@ -1,11 +1,11 @@
 import flet as ft
-from event import Event
-from eventdisplay import EventDisplay
-from formevent import FormEvent
-from controllerevent import ControllerEvent
-from utils.cards import EventCard
-from utils.buttons import *
-from utils.pagesetup import PageSetup
+from ..event import Event
+from ..eventdisplay import EventDisplay
+from ..formevent import FormEvent
+from ..controllerevent import ControllerEvent
+from ..utils.cards import EventCard
+from ..utils.buttons import *
+from ..utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 6
 
