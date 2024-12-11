@@ -1,11 +1,17 @@
+import sys
+import os
+
+# Add the src directory to the sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 import flet as ft
-from event import Event
-from eventdisplay import EventDisplay
-from formevent import FormEvent
-from controllerevent import ControllerEvent
-from utils.cards import EventCard
-from utils.buttons import *
-from utils.pagesetup import PageSetup
+from src.database.event import Event
+from src.database.eventdisplay import EventDisplay
+from src.database.formevent import FormEvent
+from src.database.controllerevent import ControllerEvent
+from src.utils.cards import EventCard
+from src.utils.buttons import *
+from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 6
 
