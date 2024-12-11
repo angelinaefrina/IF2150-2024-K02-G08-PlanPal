@@ -1,5 +1,5 @@
 import flet as ft
-from ..event import Event
+# from ..event import Event
 from ..eventdisplay import EventDisplay
 from ..formevent import FormEvent
 from ..controllerevent import ControllerEvent
