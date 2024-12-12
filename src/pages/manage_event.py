@@ -20,7 +20,8 @@ ITEMS_PER_PAGE = 6
 class EventManagerApp:
     def __init__(self, page):
         self.page = page
-        self.page.title = "Event Manager"
+        self.page.title = "PlanPal"
+        self.page.theme_mode = ft.ThemeMode.LIGHT
 
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
@@ -47,9 +48,9 @@ class EventManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "./src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "./src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "./src/assets/fonts/Afacad/Afacad-Regular.ttf",
         }
 
         # Add the header (PlanPal text) at the top of the page
@@ -144,18 +145,6 @@ class EventManagerApp:
             if len(row) == 3 or index == len(events_to_display) - 1:
                 rows.append(ft.Row(controls=row, spacing=20, alignment=ft.MainAxisAlignment.CENTER))
                 row = []
-
-        display_container = ft.Container(
-            content=ft.Column(
-                controls=rows,
-                spacing=20,
-                alignment=ft.MainAxisAlignment.START,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                expand=True,
-            ),
-            expand=True,
-            alignment=ft.alignment.top_center,
-        )
 
         # self.page.add(display_container)
 
