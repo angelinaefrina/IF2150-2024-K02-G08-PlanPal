@@ -23,7 +23,9 @@ class FormEvent:
                     ],
                     value=event_data["EventStatus"] if event_data else ""
                 ),
-            ]),
+            ],
+                height=300,
+            ),
             actions=[
                 SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page))

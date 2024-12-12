@@ -105,11 +105,14 @@ class EventManagerApp:
                         ft.Text(f"Event Date: {event_data['EventDate']}"),
                         ft.Text(f"Event Status: {event_data['EventStatus']}")
                     ],
+                        height=300,
                     spacing=20,
                     alignment=ft.MainAxisAlignment.START
                 ),
-                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page)
-                         
+                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
+                         ft.TextButton("Lihat Rundown"),
+                         ft.TextButton("Daftar Vendor"),
+                         ft.TextButton("Daftar Tamu")
                         ]
             )
             page.dialog = self.dialog
