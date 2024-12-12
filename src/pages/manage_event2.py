@@ -47,9 +47,9 @@ class EventManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "C:/Users/Anella Utari/Documents/GitHub/IF2150-2024-K02-G08-PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "C:/Users/Anella Utari/Documents/GitHub/IF2150-2024-K02-G08-PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "C:/Users/Anella Utari/Documents/GitHub/IF2150-2024-K02-G08-PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
         }
 
         # Add the header (PlanPal text) at the top of the page
