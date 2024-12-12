@@ -1,5 +1,5 @@
 import flet as ft
-from utils.buttons import *
+from src.utils.buttons import *
 
 class BudgetForm:
     def __init__(self):

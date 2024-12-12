@@ -13,6 +13,8 @@ from src.utils.cards import EventCard
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 
+# Import Pages
+from src.pages.manage_budget import BudgetManagerApp
 ITEMS_PER_PAGE = 6
 
 class EventManagerApp:
@@ -89,10 +91,30 @@ class EventManagerApp:
         else:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
-    def view_event(self, event_id):
+    def view_event(self, page, event_id):
         event_data = self.controller.get_event_details(event_id)
         if event_data:
-            self.form_event.display_form(self.page, self.on_form_submit, event_data, is_edit=False, original_event_id=event_id)
+            self.dialog = ft.AlertDialog(
+                title=ft.Text("Event Details"),
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"Event ID: {event_data['EventID']}"),
+                        ft.Text(f"Event Name: {event_data['EventName']}"),
+                        ft.Text(f"Event Location: {event_data['EventLocation']}"),
+                        ft.Text(f"Event Date: {event_data['EventDate']}"),
+                        ft.Text(f"Event Status: {event_data['EventStatus']}")
+                    ],
+                    spacing=20,
+                    alignment=ft.MainAxisAlignment.START
+                ),
+                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page)
+                         
+                        ]
+            )
+            page.dialog = self.dialog
+            self.dialog.open = True
+            page.update()
+
         else:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
@@ -114,7 +136,7 @@ class EventManagerApp:
             card = EventCard(
                 event_title=event["EventName"],
                 event_date=event["EventDate"],
-                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(event_id),
+                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(self.page, event_id),
                 on_edit_click=lambda e, event_id=event["EventID"]: self.edit_event(event_id),
                 on_delete_click=lambda e, event_id=event["EventID"]: self.delete_event(event_id)
             )
@@ -237,6 +259,12 @@ class EventManagerApp:
 
     def close_success_dialog(self):
         self.page.dialog.open = False
+        self.page.update()
+
+    def open_budget_page(self, e):
+        self.page.controls.clear()
+        self.dialog.open = False
+        BudgetManagerApp(self.page)
         self.page.update()
 
 def main(page: ft.Page):
