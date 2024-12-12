@@ -58,7 +58,6 @@ class RundownManagerApp:
                 ft.DataColumn(ft.Text("Nama", color= '#4539B4')),
                 ft.DataColumn(ft.Text("Start", color= '#4539B4')),
                 ft.DataColumn(ft.Text("End", color= '#4539B4')),
-                # ft.DataColumn(ft.Text("Durasi (Menit)", color= '#4539B4')),
                 ft.DataColumn(ft.Text("PIC", color= '#4539B4')),
                 ft.DataColumn(ft.Text("")),
             ],
@@ -170,7 +169,6 @@ class RundownManagerApp:
                         ft.DataCell(ft.Text(rundown["AgendaName"])),
                         ft.DataCell(ft.Text(rundown["AgendaTimeStart"])),
                         ft.DataCell(ft.Text(rundown["AgendaTimeEnd"])),
-                        # ft.DataCell(ft.Text(rundown["AgendaTimeEnd"] - rundown["AgendaTimeStart"])),
                         ft.DataCell(ft.Text(rundown["AgendaPIC"])),
                         ft.DataCell(
                             ft.Row(
@@ -198,20 +196,21 @@ class RundownManagerApp:
             self.update_display()
 
     def on_form_submit(self, form_data, is_edit, original_event_id):
+        # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
         if is_edit:
             self.rundown_controller.edit_rundown(
                 original_event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"],
-                form_data["AgendaTimeEnd"],
+                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
+                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
                 form_data["AgendaPIC"]
             )
         else:
             self.rundown_controller.add_rundown(
                 form_data["EventID"],
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"],
-                form_data["AgendaTimeEnd"],
+                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
+                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
                 form_data["AgendaPIC"]
             )
         self.update_display()
@@ -238,7 +237,7 @@ class RundownManagerApp:
 
     def close_error_dialog(self):
         self.page.dialog.open = False
-        self.page.update()
+        self.page.update
 
     def close_success_dialog(self):
         self.page.dialog.open = False
