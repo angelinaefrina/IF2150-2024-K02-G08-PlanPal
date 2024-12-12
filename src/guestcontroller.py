@@ -3,9 +3,10 @@ class GuestController:
         self.guest_list = []
         self._next_guest_id = 1  # Start ID from 1
 
-    def add_guest_list(self, guest_name, rsvp_status):
+    def add_guest_list(self, event_id, guest_name, rsvp_status):
         if self.validate_guest_list(guest_name, rsvp_status):
             new_guest = {
+                "EventID": event_id,
                 "GuestID": self._next_guest_id,
                 "GuestName": guest_name,
                 "RSVPStatus": rsvp_status,
@@ -57,3 +58,12 @@ class GuestController:
         print("Daftar Tamu:")
         for guest in self.guest_list:
             print(f"- GuestID: {guest['GuestID']}, Name: {guest['GuestName']}, RSVPStatus: {guest['RSVPStatus']}")
+
+    def get_all_guest_list(self):
+        return self.guest_list
+    
+    def get_guest_list(self, guest_id):
+        for guest in self.guest_list:
+            if guest["GuestID"] == guest_id:
+                return guest
+        return None

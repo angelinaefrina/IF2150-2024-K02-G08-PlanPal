@@ -1,130 +1,208 @@
+import sys
+import os
+
+# Add the src directory to the sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 import flet as ft
 from guestcontroller import GuestController
+from guestlistform import GuestListForm
+from utils.buttons import *
+from utils.pagesetup import PageSetup
 
+ITEMS_PER_PAGE = 6
 class GuestManagerApp:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.page.title = "PlanPal Guest Manager"
-        self.page.bgcolor = "#FFF5E9"
+        self.page.title = "Guest List Management"
         
-        self.guest_controller = GuestController()
-        self.guest_list_container = ft.Container()
+        # Setup page
+        self.setup_page()
+        
+        self.controller = GuestController()
+        self.guest_list_form = GuestListForm()
+        # self.guest_list_container = ft.Container()
+
+        self.controller.add_guest_list()
+        self.controller.add_guest_list()
 
         # Pagination variables
-        self.current_page = 1
-        self.guests_per_page = 8
+        self.current_page = 0
+        self.create_widgets()
+        self.update_display()
 
-        # Input components
-        self.guest_name_input = ft.TextField(label="Nama Tamu", autofocus=True)
-        self.rsvp_status_input = ft.Dropdown(
-            label="Status RSVP",
-            options=[
-                ft.dropdown.Option("Hadir"),
-                ft.dropdown.Option("Tidak Hadir"),
-                ft.dropdown.Option("Menyusul"),
-            ],
+    def setup_page(self):
+        width = self.page.window.width
+        height = self.page.window.height
+        self.page.bgcolor = '#FFF5E9'
+
+        # Set fonts
+        self.page.fonts = {
+            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+        }
+        # Header PlanPal
+        self.page.add(
+            ft.Column(
+                controls=[
+                    ft.Container(
+                        content=ft.Text("PlanPal", font_family="Header", color="#FFF5E9", size=64, weight=ft.FontWeight.BOLD),
+                        width=width,
+                        height=100,
+                        bgcolor='#4539B4',
+                        padding=ft.padding.all(5),
+                        alignment=ft.alignment.top_left
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER
+            )
         )
 
-        # UI components
-        self.previous_button = ft.ElevatedButton("Previous", on_click=self.previous_page)
-        self.next_button = ft.ElevatedButton("Next", on_click=self.next_page)
-        self.guest_table = ft.DataTable(
+    def create_widgets(self):
+        self.tree = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("Nama Tamu", color="#4539B4", size=20)),
-                ft.DataColumn(ft.Text("Status RSVP", color="#4539B4", size=20)),
+                ft.DataColumn(ft.Text("Nama Tamu", color="#4539B4")),
+                ft.DataColumn(ft.Text("Status RSVP", color="#4539B4")),
                 ft.DataColumn(ft.Text(" ")),
             ],
             rows=[],
+            bgcolor="#FFF5E9",
+            heading_row_color="FAEBD9"
         )
 
-        self.build_ui()
-        self.update_ui()
+        self.title = ft.Text(
+            value= "Daftar Tamu", 
+            size=30, 
+            weight=ft.FontWeight.BOLD, 
+            color="#4539B4",
+            font_family="Default_Bold"
+            )
+        
+        self.add_button = ft.ElevatedButton(
+            text="Add Guest",
+            style=ft.ButtonStyle(
+                padding=ft.padding.symmetric(horizontal=20, vertical=10),
+                bgcolor= "#C4E8F8",
+                text_style= ft.TextStyle(
+                    color= "#4539B4",
+                    weight= ft.FontWeight.BOLD,
+                    font_family="Default_Bold",
+                    size=20,
+                )
+            ),
+            color="#4539B4",
+            on_click=self.add_guest
+        )
 
-    def build_ui(self):
-        """Build the main UI."""
+        self.prev_button = ft.ElevatedButton("Previous", on_click=self.previous_page, disabled=True)
+        self.next_button = ft.ElevatedButton("Next", on_click=self.next_page, disabled=True)
+        
         self.page.add(
             ft.Column(
-                [
-                    # Header
+                [   
                     ft.Container(
-                        content=ft.Text(
-                            "PlanPal", size=40, weight=ft.FontWeight.BOLD, color="#FFF5E9"
-                        ),
-                        bgcolor="#4539B4",
-                        padding=ft.padding.symmetric(horizontal=16, vertical=6),
-                        alignment=ft.alignment.center_left,
-                        expand=True,
+                        content= self.title,
+                        alignment= ft.alignment.center,
+                        padding= ft.padding.only(bottom=10)
                     ),
-                    # Title
+                    ft.Container(
+                        content= self.add_button,
+                        alignment= ft.alignment.center,
+                        padding= ft.padding.only(bottom=20)
+                    ),
+                    ft.Container(
+                        content= self.tree,
+                        alignment= ft.alignment.top_center,
+                        expand= True
+                    ),
                     ft.Row(
-                        [ft.Text("Daftar Tamu", size=30, weight=ft.FontWeight.BOLD, color="#4539B4")],
-                        alignment=ft.MainAxisAlignment.CENTER,
+                        [self.prev_button, self.next_button],
+                        alignment= ft.MainAxisAlignment.CENTER,
+                        spacing= 20,
                     ),
-                    # Add Button
-                    ft.Row(
-                        [
-                            ft.ElevatedButton(
-                                content=ft.Text("Tambah", weight=ft.FontWeight.BOLD, color="#4539B4"),
-                                on_click=self.add_guest,
-                            ),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                    ),
-                    ft.Divider(),
-                    # Guest List Container
-                    self.guest_list_container,
-                    # Pagination
-                    ft.Row(
-                        [
-                            self.previous_button,
-                            ft.Text(f"Page {self.current_page} of {len(self.guest_controller.guest_list) // self.guests_per_page + 1}", size=12),
-                            self.next_button,
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                    ),
-                ]
+                ],
+                alignment=ft.MainAxisAlignment.START,
+                expand=True,
             )
         )
 
-    def update_ui(self):
-        """Update guest list UI."""
-        self.update_guest_list()
-        self.page.update()
+    def add_guest(self, e):
+        self.guest_list_form.display_form(self.page, self.submit_form, is_edit=False)
 
-    def update_guest_list(self):
-        """Update the guest list table with pagination."""
-        start_index = (self.current_page - 1) * self.guests_per_page
-        end_index = start_index + self.guests_per_page
-        guests_to_display = self.guest_controller.guest_list[start_index:end_index]
+    def edit_budget(self, event_id, guest_name):
+        print(f"Editing budget for EventID: {event_id}")
+        guest_list = self.controller.get_guest_list(event_id)
 
-        self.guest_table.rows = [
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(guest["GuestName"], color="#4539B4")),
-                    ft.DataCell(ft.Text(guest["RSVPStatus"], color="#4539B4")),
-                    ft.DataCell(
-                        ft.Row(
-                            [
-                                ft.IconButton(
-                                    icon=ft.icons.EDIT,
-                                    on_click=lambda e, idx=index: self.edit_guest(idx),
-                                ),
-                                ft.IconButton(
-                                    icon=ft.icons.DELETE,
-                                    icon_color=ft.colors.RED,
-                                    on_click=lambda e, idx=index: self.delete_guest(idx),
-                                ),
-                            ]
-                        )
-                    ),
-                ]
+        guest_data = next(
+            (guest for guest in guest_list if guest["GuestName"] == guest_name), None
+        )
+
+        if guest_data:
+            self.guest_list_form.display_form(
+                page=self.page, 
+                on_submit=self.on_submit_form, 
+                guest_data=guest_data, 
+                is_edit=True, 
+                original_event_id=event_id,
             )
-            for index, guest in enumerate(guests_to_display)
-        ]
-        self.guest_list_container.content = self.guest_table
+        else:
+            self.show_error_dialog("Guest not found.")
+    
+    def delete_guest(self, event_id, guest_name):
+        if self.controller.get_guest_list(event_id):
+            self.controller.delete_guest_list(event_id, guest_name)
+            self.update_display()
+        else:
+            self.show_error_dialog("Guest not found.")
+
+    def update_display(self):
+        total_pages = (len(self.controller.get_all_guest_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+
+        self.prev_button.disabled = self.current_page == 0
+        self.next_button.disabled = self.current_page >= total_pages - 1
+
+        start_index = self.current_page * ITEMS_PER_PAGE
+        end_index = start_index + ITEMS_PER_PAGE
+
+        guests_to_display = self.controller.get_all_guest_list()
+        self.tree.rows.clear()
+        for guest in guests_to_display[start_index:end_index]:
+            self.tree.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(guest["GuestName"], color="#4539B4")),
+                        ft.DataCell(ft.Text(guest["RSVPStatus"], color="#4539B4")),
+                        ft.DataCell(
+                            ft.Row(
+                                controls=
+                                    [
+                                        EditButton(on_click=lambda e, event_id=guest["EventID"], guest_name=guest["GuestName"]: self.edit_guest(event_id, guest_name)),
+                                        DeleteButton(on_click=lambda e, event_id=guest["EventID"], guest_name=guest["GuestName"]: self.delete_guest(event_id, guest_name)),
+                                    ]
+                            )
+                        ),
+                    ]
+                )
+            )
         self.page.update()
 
-    def previous_page(self, e):
+    def on_form_submit(self, form_data, is_edit, original_event_id):
+        if is_edit:
+            self.controller.edit_guest_list(
+                original_event_id, 
+                form_data["GuestName"],
+                form_data["RSVPStatus"]
+                )
+        else:
+            self.controller.add_guest_list(
+                form_data["EventID"],
+                form_data["GuestName"], 
+                form_data["RSVPStatus"]
+                )
+        self.update_display()
+
+    def prev_page(self, e):
         """Go to the previous page."""
         if self.current_page > 1:
             self.current_page -= 1
@@ -133,117 +211,38 @@ class GuestManagerApp:
 
     def next_page(self, e):
         """Go to the next page."""
-        total_pages = len(self.guest_controller.guest_list) // self.guests_per_page + 1
+        total_pages = len(self.controller.guest_list) // self.guests_per_page + 1
         if self.current_page < total_pages:
             self.current_page += 1
             self.update_guest_list()
             self.page.update()
 
-    def add_guest(self, e):
-        """Show dialog to add a new guest."""
-        self.show_add_guest_dialog()
-
-    def show_add_guest_dialog(self):
-        """Display the Add Guest dialog."""
-        self.guest_name_input.value = ""
-        self.rsvp_status_input.value = None
-
-        add_guest_dialog = ft.AlertDialog(
-            title=ft.Text("Tambah Tamu", color="#4539B4"),
-            content=ft.Column([self.guest_name_input, self.rsvp_status_input]),
-            actions=[
-                ft.TextButton("Keluar", on_click=lambda _: self.close_dialog(add_guest_dialog)),
-                ft.TextButton("Tambah", on_click=lambda _: self.validate_add_guest(add_guest_dialog)),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#FFF5E9",
+    def show_error_dialog(self, message):
+        error_dialog = ft.AlertDialog(
+            title=ft.Text("Error"),
+            content=ft.Text(message),
+            actions=[ft.TextButton("OK", on_click=lambda e: self.close_error_dialog())]
         )
-        self.page.dialog = add_guest_dialog
-        add_guest_dialog.open = True
+        self.page.dialog = error_dialog
+        error_dialog.open = True
         self.page.update()
 
-    def validate_add_guest(self, dialog):
-        """Validate input before adding a new guest."""
-        guest_name = self.guest_name_input.value.strip()
-        rsvp_status = self.rsvp_status_input.value
-
-        if not guest_name or not rsvp_status:
-            return  # Display validation errors
-        self.save_new_guest(dialog)
-
-    def save_new_guest(self, dialog):
-        """Save a new guest."""
-        guest_name = self.guest_name_input.value.strip()
-        rsvp_status = self.rsvp_status_input.value
-        self.guest_controller.add_guest_list(guest_name, rsvp_status)
-        self.close_dialog(dialog)
-        self.update_ui()
-
-    def edit_guest(self, index):
-        """Edit a guest."""
-        guest = self.guest_controller.guest_list[index]
-        self.show_edit_guest_dialog(index, guest["GuestName"], guest["RSVPStatus"])
-
-    def show_edit_guest_dialog(self, index, guest_name, rsvp_status):
-        """Show the Edit Guest dialog."""
-        self.guest_name_input.value = guest_name
-        self.rsvp_status_input.value = rsvp_status
-
-        edit_guest_dialog = ft.AlertDialog(
-            title=ft.Text("Edit Tamu", color="#4539B4"),
-            content=ft.Column([self.guest_name_input, self.rsvp_status_input]),
-            actions=[
-                ft.TextButton("Keluar", on_click=lambda _: self.close_dialog(edit_guest_dialog)),
-                ft.TextButton("Simpan", on_click=lambda _: self.save_edited_guest(index, edit_guest_dialog)),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#FFF5E9",
+    def show_success_dialog(self, message):
+        success_dialog = ft.AlertDialog(
+            title=ft.Text("Success"),
+            content=ft.Text(message),
+            actions=[ft.TextButton("OK", on_click=lambda e: self.close_success_dialog())]
         )
-        self.page.dialog = edit_guest_dialog
-        edit_guest_dialog.open = True
+        self.page.dialog = success_dialog
+        success_dialog.open = True
         self.page.update()
 
-    def save_edited_guest(self, index, dialog):
-        """Save the edited guest."""
-        guest_name = self.guest_name_input.value.strip()
-        rsvp_status = self.rsvp_status_input.value
-        self.guest_controller.edit_guest_list(self.guest_controller.guest_list[index]["GuestID"], guest_name, rsvp_status)
-        self.close_dialog(dialog)
-        self.update_ui()
-
-    def delete_guest(self, index):
-        """Delete a guest."""
-        guest = self.guest_controller.guest_list[index]
-        self.show_confirmation_dialog(
-            title="Hapus Tamu",
-            content=f"Yakin ingin menghapus tamu '{guest['GuestName']}'?",
-            on_confirm=lambda: self.confirm_delete_guest(index),
-        )
-
-    def confirm_delete_guest(self, index):
-        """Confirm deletion of a guest."""
-        self.guest_controller.delete_guest_list(self.guest_controller.guest_list[index]["GuestID"])
-        self.update_ui()
-
-    def show_confirmation_dialog(self, title, content, on_confirm):
-        """Display a confirmation dialog."""
-        confirmation_dialog = ft.AlertDialog(
-            title=ft.Text(title, color="#4539B4"),
-            content=ft.Text(content, color="#4539B4"),
-            actions=[
-                ft.TextButton("Tidak", on_click=lambda _: self.close_dialog(confirmation_dialog)),
-                ft.TextButton("Ya", on_click=lambda _: (self.close_dialog(confirmation_dialog), on_confirm())),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#FFF5E9",
-        )
-        self.page.dialog = confirmation_dialog
-        confirmation_dialog.open = True
+    def close_error_dialog(self):
+        self.page.dialog.open = False
         self.page.update()
 
-    def close_dialog(self, dialog):
-        """Close a dialog."""
-        dialog.open = False
+    def close_success_dialog(self):
+        self.page.dialog.open = False
         self.page.update()
 
 def main(page: ft.Page):
