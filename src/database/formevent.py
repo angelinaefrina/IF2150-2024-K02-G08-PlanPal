@@ -1,50 +1,79 @@
+import flet as ft
+from utils.buttons import *
+
 class FormEvent:
     def __init__(self):
         self.event_details = None
 
-    def display_event_details(self):
-        if self.event_details:
-            print("Detail Acara:")
-            for key, value in self.event_details.items():
-                print(f"{key}: {value}")
-        else:
-            self.display_error_message("Belum ada acara yang tersimpan.")
+    def display_form(self, page, on_submit, event_data=None, is_edit=False, original_event_id=None):
+        print("Displaying form with event data:", event_data)
+        self.dialog = ft.AlertDialog(
+            title=ft.Text("Edit Event" if is_edit else "Add Event"),
+            content=ft.Column([
+                ft.TextField(label="Event ID", value=event_data["EventID"] if event_data else "", on_change=self.validate_integer),
+                ft.TextField(label="Event Name", value=event_data["EventName"] if event_data else ""),
+                ft.TextField(label="Event Location", value=event_data["EventLocation"] if event_data else ""),
+                ft.TextField(label="Event Date (YYYY-MM-DD)", value=event_data["EventDate"] if event_data else ""),
+                ft.Dropdown(
+                    label="Event Status",
+                    options=[
+                        ft.dropdown.Option("Belum dimulai"),
+                        ft.dropdown.Option("Sedang berlangsung"),
+                        ft.dropdown.Option("Sudah selesai")
+                    ],
+                    value=event_data["EventStatus"] if event_data else ""
+                ),
+            ]),
+            actions=[
+                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                CancelButton(on_click_action=lambda e: self.close_dialog(page))
+            ]
+        )
+        page.dialog = self.dialog  # Set the dialog on the page
+        self.dialog.open = True  # Open the dialog
+        page.update()  # Update the page to reflect changes
 
-    # Metode untuk menampilkan form
-    def display_form(self):
+    def validate_integer(self, e):
+        if not e.control.value.isdigit():
+            e.control.error_text = "Event ID harus berupa angka."
+        else:
+            e.control.error_text = None
+        e.control.update()
+
+    def submit_form(self, page, on_submit, is_edit, original_event_id):
+        print("Submitting form")
         try:
-            event_id = input()
-            event_location = input()
-            event_date = input()
-            event_status = input()
-            return {
-                "EventID": event_id,
-                "EventLocation": event_location,
-                "EventDate": event_date,
-                "EventStatus": event_status
+            event_id = self.dialog.content.controls[0].value
+            # if not event_id.isdigit():
+            #     raise ValueError("Event ID harus berupa angka.")
+            
+            form_data = {
+                "EventID": int(event_id),
+                "EventName": self.dialog.content.controls[1].value,
+                "EventLocation": self.dialog.content.controls[2].value,
+                "EventDate": self.dialog.content.controls[3].value,
+                "EventStatus": self.dialog.content.controls[4].value
             }
-        except Exception as e:
-            self.display_error(f"Error saat mengisi form: {e}")
-            return None
+            if self.validate_form_data(form_data):
+                self.event_details = form_data
+                self.close_dialog(page)  # Close the dialog
+                print("Form data is valid, calling on_submit")
+                on_submit(form_data, is_edit, original_event_id)
+            else:
+                self.display_error_message("Data form tidak valid.")
+        except ValueError as e:
+            self.display_error_message(str(e))
 
-    # Metode untuk menyimpan form detail acara
-    def submit_form(self, form_data):
-        if form_data and self.validate_form_data(form_data):
-            self.event_details = form_data
-            print("Detail acara berhasil disimpan!")
-        else:
-            self.display_error_message("Data form tidak valid.")
+    def close_dialog(self, page):
+        self.dialog.open = False  # Close the dialog
+        page.update()  # Update the page to reflect changes
 
     def display_error_message(self, message):
-        print(f"Error: {message}")
+        self.dialog.content.controls.append(ft.Text(message, color=ft.colors.RED))
+        self.dialog.update()
 
-    # Metode untuk menampilkan pesan error jika data invalid
-    def display_error(self, error_message):
-        print(f"Error: {error_message}")
-
-    # Metode tambahan untuk validasi data form
     def validate_form_data(self, form_data):
-        required_fields = ["EventID", "EventLocation", "EventDate", "EventStatus"]
+        required_fields = ["EventID", "EventName", "EventLocation", "EventDate", "EventStatus"]
         for field in required_fields:
             if field not in form_data or not form_data[field]:
                 self.display_error_message(f"Field '{field}' tidak boleh kosong.")

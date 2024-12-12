@@ -16,9 +16,10 @@ class ControllerEvent:
     def validate_event_list(self):
         return len(self._event_list) > 0
 
-    def add_event(self, event_id, location, date, status):
+    def add_event(self, event_id, eventname, location, date, status):
         new_event = {
             "EventID": event_id,
+            "EventName": eventname,
             "EventLocation": location,
             "EventDate": date,
             "EventStatus": status
