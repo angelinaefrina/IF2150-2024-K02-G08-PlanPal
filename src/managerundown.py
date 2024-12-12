@@ -1,124 +1,251 @@
+import flet as ft
 from rundown import Rundown
 from rundownpage import RundownPage
 from rundowncontroller import RundownController
-import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from utils.buttons import *
+from utils.pagesetup import PageSetup
 
-class ManageRundown(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Manage Rundown")
-        self.geometry("800x600")
+ITEMS_PER_PAGE = 6
+class RundownManagerApp:
+    def __init__(self, page):
+        self.page = page
+        self.page.title = "Rundown Management"
+
+        # Setup page
+        self.setup_page()
 
         # Initialize Controller and Page
         self.rundown_controller = RundownController()
         self.rundown_page = RundownPage(self.rundown_controller)
 
-        self._create_widgets()
+        self.current_page = 0
+        self.create_widgets()
+        self.update_display()
+    
+    def setup_page(self):
+        width = self.page.window.width
+        height = self.page.window.height
+        self.page.bgcolor = '#FFF5E9'
 
-    def _create_widgets(self):
-        # Input frame
-        input_frame = tk.Frame(self)
-        input_frame.pack(pady=10, fill=tk.X)
+        # Set fonts
+        self.page.fonts = {
+            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+        }
+        # Header PlanPal
+        self.page.add(
+            ft.Column(
+                controls=[
+                    ft.Container(
+                        content=ft.Text("PlanPal", font_family="Header", color="#FFF5E9", size=64, weight=ft.FontWeight.BOLD),
+                        width=width,
+                        height=100,
+                        bgcolor='#4539B4',
+                        padding=ft.padding.all(5),
+                        alignment=ft.alignment.top_left
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER
+            )
+        )
+    
 
-        # Input labels and fields
-        tk.Label(input_frame, text="Event ID").grid(row=0, column=0, padx=5, pady=5)
-        self.event_id_entry = tk.Entry(input_frame)
-        self.event_id_entry.grid(row=0, column=1, padx=5, pady=5)
+    def create_widgets(self):
+        self.tree = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Event ID", color= '#4539B4')),
+                ft.DataColumn(ft.Text("Nama", color= '#4539B4')),
+                ft.DataColumn(ft.Text("Start", color= '#4539B4')),
+                ft.DataColumn(ft.Text("End", color= '#4539B4')),
+                # ft.DataColumn(ft.Text("Durasi (Menit)", color= '#4539B4')),
+                ft.DataColumn(ft.Text("PIC", color= '#4539B4')),
+                ft.DataColumn(ft.Text("")),
+            ],
+            rows=[],
+            bgcolor="#FFF5E9",
+            heading_row_color= "#FAEBD9"
+        )
 
-        tk.Label(input_frame, text="Agenda Name").grid(row=1, column=0, padx=5, pady=5)
-        self.agenda_name_entry = tk.Entry(input_frame)
-        self.agenda_name_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.title = ft.Text(
+            value= "Rundown",
+            size= 30,
+            weight= ft.FontWeight.BOLD,
+            color= "#4539B4",
+            font_family= "Default_Bold"
+        )
 
-        tk.Label(input_frame, text="Start Time").grid(row=0, column=2, padx=5, pady=5)
-        self.start_time_entry = tk.Entry(input_frame)
-        self.start_time_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.add_button = ft.ElevatedButton(
+            text= "Add Rundown",
+            style= ft.ButtonStyle(
+                padding= ft.padding.symmetric(horizontal=20, vertical=10),
+                bgcolor= '#C4E8F8',
+                text_style= ft.TextStyle(
+                    color= '#4539B4',
+                    weight= ft.FontWeight.BOLD,
+                    font_family= "Default_Bold",
+                    size= 20,
+                )
+            ),
+            color= '#4539B4',
+            on_click= self.add_rundown
+        )
+        
+        self.prev_button = ft.ElevatedButton(text="Prev", on_click=self.prev_page, disabled=True)
+        self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page, disabled=True)
 
-        tk.Label(input_frame, text="End Time").grid(row=1, column=2, padx=5, pady=5)
-        self.end_time_entry = tk.Entry(input_frame)
-        self.end_time_entry.grid(row=1, column=3, padx=5, pady=5)
+        self.page.add(
+            ft.Column(
+                [
+                    ft.Container(
+                        content= self.title,
+                        alignment= ft.alignment.center,
+                        padding= ft.padding.only(bottom=10),
+                    ),
+                    ft.Container(
+                        content= self.add_button,
+                        alignment= ft.alignment.center,
+                        padding= ft.padding.only(bottom=20),
+                    ),
+                    ft.Container(
+                        content= self.tree,
+                        alignment= ft.alignment.top_center,
+                        expand= True
+                    ),
+                    ft.Row(
+                        [self.prev_button, self.next_button],
+                        alignment= ft.MainAxisAlignment.CENTER,
+                        spacing= 20,
+                    ),
+                ],
+                alignment= ft.MainAxisAlignment.START,
+                expand= True,
+            )
+        )
 
-        # tk.Label(input_frame, text="Duration").grid(row=0, column=4, padx=5, pady=5)
-        # self.duration_entry = tk.Entry(input_frame)
-        # self.duration_entry.grid(row=0, column=5, padx=5, pady=5)
+    def add_rundown(self, e):
+        self.rundown_page.display_form(self.page, self.on_form_submit, is_edit=False)
+        
+    def edit_rundown(self, event_id, agenda_name):
+        rundowns = self.rundown_controller.get_rundown_list(event_id)
 
-        tk.Label(input_frame, text="PIC").grid(row=1, column=4, padx=5, pady=5)
-        self.pic_entry = tk.Entry(input_frame)
-        self.pic_entry.grid(row=1, column=5, padx=5, pady=5)
+        print(f"Editing rundown {agenda_name} for event {event_id}")
+        rundown_data = next(
+            (rundown for rundown in rundowns if rundown["AgendaName"] == agenda_name),
+        )
 
-        # Buttons
-        button_frame = tk.Frame(self)
-        button_frame.pack(pady=10)
+        if rundown_data:
+            self.rundown_page.display_form(
+                page= self.page,
+                on_submit= self.on_form_submit,
+                rundown_data= rundown_data,
+                is_edit= True,
+                original_event_id= event_id
+            )
+        else:
+            self.show_error_dialog("Rundown not found.")
 
-        tk.Button(button_frame, text="Add Rundown", command=self.add_rundown).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Display Rundown", command=self.display_rundown).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Delete Rundown", command=self.delete_rundown).pack(side=tk.LEFT, padx=5)
+    def delete_rundown(self, event_id, agenda_name):
+        if self.rundown_controller.get_rundown_list(event_id):
+            self.rundown_controller.delete_rundown(event_id, agenda_name)
+            self.update_display()
 
-        # Rundown display area
-        self.tree = ttk.Treeview(self, columns=("Event ID", "Agenda Name", "Start Time", "End Time", "Duration", "PIC"), show="headings")
-        self.tree.pack(fill=tk.BOTH, expand=True)
+    def update_display(self):
+        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
-        for col in self.tree["columns"]:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=100)
+        self.prev_button.disabled = self.current_page == 0
+        self.next_button.disabled = self.current_page >= total_pages - 1
 
-    def add_rundown(self):
-        event_id = self.event_id_entry.get()
-        agenda_name = self.agenda_name_entry.get()
-        start_time = self.start_time_entry.get()
-        end_time = self.end_time_entry.get()
-        duration = self.duration_entry.get()
-        pic = self.pic_entry.get()
+        start_index = self.current_page * ITEMS_PER_PAGE
+        end_index = self.current_page + ITEMS_PER_PAGE
 
-        if not (event_id and agenda_name and start_time and end_time and duration and pic):
-            messagebox.showerror("Error", "All fields are required!")
-            return
+        rundowns = self.rundown_controller.get_all_rundown_list()
+        self.tree.rows.clear()
+        for rundown in rundowns[start_index:end_index]:
+            self.tree.rows.append(
+                ft.DataRow(
+                    cells=
+                    [
+                        ft.DataCell(ft.Text(rundown["EventID"])),
+                        ft.DataCell(ft.Text(rundown["AgendaName"])),
+                        ft.DataCell(ft.Text(rundown["AgendaTimeStart"])),
+                        ft.DataCell(ft.Text(rundown["AgendaTimeEnd"])),
+                        # ft.DataCell(ft.Text(rundown["AgendaTimeEnd"] - rundown["AgendaTimeStart"])),
+                        ft.DataCell(ft.Text(rundown["AgendaPIC"])),
+                        ft.DataCell(
+                            ft.Row(
+                                controls=
+                                [
+                                    EditButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.edit_rundown(event_id, agenda_name)),
+                                    DeleteButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.delete_rundown(event_id, agenda_name)),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        self.page.update()
 
-        new_rundown = Rundown(event_id, agenda_name, start_time, end_time, duration, pic)
+    def prev_page(self, e):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.update_display()
 
-        if self.rundown_controller.validate_rundown(new_rundown):
-            self.rundown_controller.add_rundown(new_rundown)
-            self.refresh_treeview()
-            messagebox.showinfo("Success", "Rundown added successfully!")
+    def next_page(self, e):
+        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        if self.current_page < total_pages - 1:
+            self.current_page += 1
+            self.update_display()
 
-    def delete_rundown(self):
-        selected_item = self.tree.selection()
-        if not selected_item:
-            messagebox.showerror("Error", "No rundown selected!")
-            return
+    def on_form_submit(self, form_data, is_edit, original_event_id):
+        if is_edit:
+            self.rundown_controller.edit_rundown(
+                original_event_id,
+                form_data["AgendaName"],
+                form_data["AgendaTimeStart"],
+                form_data["AgendaTimeEnd"],
+                form_data["AgendaPIC"]
+            )
+        else:
+            self.rundown_controller.add_rundown(
+                form_data["EventID"],
+                form_data["AgendaName"],
+                form_data["AgendaTimeStart"],
+                form_data["AgendaTimeEnd"],
+                form_data["AgendaPIC"]
+            )
+        self.update_display()
 
-        values = self.tree.item(selected_item)["values"]
-        event_id, agenda_name = values[0], values[1]
-        self.rundown_controller.delete_rundown(event_id, agenda_name)
-        self.refresh_treeview()
-        messagebox.showinfo("Success", f"Rundown '{agenda_name}' deleted successfully!")
+    def show_error_dialog(self, message):
+        error_dialog = ft.AlertDialog(
+            title= ft.Text("Error"),
+            content= ft.Text(message),
+            actions= [ft.TextButton(text="OK", on_click= lambda e: self.close_error_dialog())]
+        )
+        self.page.dialog = error_dialog
+        error_dialog.open = True
+        self.page.update()
 
-    def display_rundown(self):
-        event_id = self.event_id_entry.get()
-        if not event_id:
-            messagebox.showerror("Error", "Event ID is required to display rundown!")
-            return
+    def show_success_dialog(self, message):
+        success_dialog = ft.AlertDialog(
+            title= ft.Text("Success"),
+            content= ft.Text(message),
+            actions= [ft.TextButton(text="OK", on_click= lambda e: self.close_success_dialog())]
+        )
+        self.page.dialog = success_dialog
+        success_dialog.open = True
+        self.page.update()
 
-        self.rundown_page.display_rundown(event_id)
+    def close_error_dialog(self):
+        self.page.dialog.open = False
+        self.page.update()
 
-    def refresh_treeview(self):
-        # Clear treeview
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        # Add current rundowns
-        for rundown in self.rundown_controller.rundown_list:
-            self.tree.insert("", tk.END, values=(
-                rundown.event_id,
-                rundown.agenda_name,
-                rundown.agenda_time_start,
-                rundown.agenda_time_end,
-                rundown.agenda_duration,
-                rundown.agenda_pic
-            ))
+    def close_success_dialog(self):
+        self.page.dialog.open = False
+        self.page.update()
 
 
-if __name__ == "__main__":
-    app = ManageRundown()
-    app.mainloop()
+def main(page: ft.Page):
+    app = RundownManagerApp(page)
+
+ft.app(target=main)

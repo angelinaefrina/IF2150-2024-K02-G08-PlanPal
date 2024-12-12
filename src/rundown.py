@@ -6,7 +6,7 @@ class Rundown:
         self.agenda_name = agenda_name
         self.agenda_time_start = agenda_time_start
         self.agenda_time_end = agenda_time_end
-        self.agenda_duration = self.calculate_duration(agenda_time_start, agenda_time_end)
+        # self.agenda_duration = self.calculate_duration(agenda_time_start, agenda_time_end)
         self.agenda_pic = agenda_pic
 
     def calculate_duration(self, start_time, end_time):
@@ -22,7 +22,7 @@ class Rundown:
             "AgendaName": self.agenda_name,
             "AgendaTimeStart": self.agenda_time_start,
             "AgendaTimeEnd": self.agenda_time_end,
-            "AgendaDuration": self.agenda_duration,
+            # "AgendaDuration": self.agenda_duration,
             "AgendaPIC": self.agenda_pic
         }
 

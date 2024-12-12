@@ -2,32 +2,53 @@ class RundownController:
     def __init__(self):
         self.rundown_list = []
 
-    def add_rundown(self, rundown):
-        self.rundown_list.append(rundown)
-        print(f"Rundown '{rundown.agenda_name}' berhasil ditambahkan.")
+    def add_rundown(self, event_id, agenda_name, agenda_time_start, agenda_time_end, agenda_pic):
+        # if self.validate_rundown(agenda_time_start, agenda_time_end):
+            new_rundown = {
+                "EventID": event_id,
+                "AgendaName": agenda_name,
+                "AgendaTimeStart": agenda_time_start,
+                "AgendaTimeEnd": agenda_time_end,
+                # "AgendaDuration": int(agenda_time_end) - int(agenda_time_start),
+                "AgendaPIC": agenda_pic
+            } 
+            self.rundown_list.append(new_rundown)
+            print(f"Rundown {agenda_name} untuk event {event_id} berhasil ditambahkan.")
+        # else:
+        #     print("Data rundown tidak valid. Penambahan dibatalkan.")
 
     def delete_rundown(self, event_id, agenda_name):
         for rundown in self.rundown_list:
-            if rundown.event_id == event_id and rundown.agenda_name.lower() == agenda_name.lower():
+            if rundown["EventID"] == event_id and rundown["AgendaName"] == agenda_name:
                 self.rundown_list.remove(rundown)
                 print(f"Rundown '{agenda_name}' pada EventID {event_id} berhasil dihapus.")
                 return
-        print(f"Rundown dengan EventID {event_id} dan Nama Agenda '{agenda_name}' tidak ditemukan.")
+        print(f"Rundown {agenda_name} untuk event {event_id} berhasil ditambahkan.")
+       
+    def edit_rundown(self, original_event_id, agenda_name, agenda_time_start, agenda_time_end, agenda_pic):
+        for rundown in self.rundown_list:
+            if rundown["EventID"] == original_event_id:
+                rundown["AgendaName"] = agenda_name
+                rundown["AgendaTimeStart"] = agenda_time_start
+                rundown["AgendaTimeEnd"] = agenda_time_end
+                rundown["AgendaPIC"] = agenda_pic
+                # rundown["AgendaDuration"] = agenda_time_end - agenda_time_start
+                print(f"Updated budget: {rundown}")
+                break
 
-    def validate_rundown(self, rundown):
-        if not rundown.agenda_name or not rundown.agenda_time_start or not rundown.agenda_time_end or not rundown.agenda_pic:
-            print("Data rundown tidak lengkap!")
-            return False
-        if rundown.agenda_time_start >= rundown.agenda_time_end:
-            print("Waktu mulai harus lebih kecil dari waktu selesai.")
-            return False
-        print("Rundown valid.")
-        return True
-
-    def edit_rundown(self, event_id, agenda_name, new_rundown):
-        for index, rundown in enumerate(self.rundown_list):
-            if rundown.event_id == event_id and rundown.agenda_name.lower() == agenda_name.lower():
-                self.rundown_list[index] = new_rundown
-                print(f"Rundown '{agenda_name}' pada EventID {event_id} berhasil diperbarui.")
-                return
-        print(f"Rundown dengan EventID {event_id} dan Nama Agenda '{agenda_name}' tidak ditemukan.")
+    # def validate_rundown(self, agenda_time_start, agenda_time_end):
+    #     if agenda_time_start >= agenda_time_end:
+    #         print("Waktu mulai harus lebih kecil dari waktu selesai.")
+    #         return False
+    #     return True
+    
+    def get_all_rundown_list(self):
+        return self.rundown_list
+    
+    def get_rundown_list(self, event_id):
+        rundowns = [rundown for rundown in self.rundown_list if rundown["EventID"] == event_id]
+        if rundowns:
+            return rundowns
+        else:
+            print(f"Tidak ada rundown untuk event {event_id}.")
+            return []
