@@ -13,9 +13,9 @@ def main(page: ft.Page):
     # Define table columns
     guest_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text(" "*50 + "Nama Tamu", color="#4539B4", size=20)),
-            ft.DataColumn(ft.Text(" "*50 + "Status RSVP", color="#4539B4", size=20)),
-            ft.DataColumn(ft.Text(" "*50)),
+            ft.DataColumn(ft.Text("Nama Tamu", color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text("Status RSVP", color="#4539B4", size=20)),
+            ft.DataColumn(ft.Text(" ")),
         ],
         rows=[],
     )
@@ -29,8 +29,8 @@ def main(page: ft.Page):
         guest_table.rows = [
             ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(" "*70 + guest["GuestName"], color="#4539B4")),
-                    ft.DataCell(ft.Text(" "*70 + guest["RSVPStatus"], color="#4539B4")),
+                    ft.DataCell(ft.Text(guest["GuestName"], color="#4539B4")),
+                    ft.DataCell(ft.Text(guest["RSVPStatus"], color="#4539B4")),
                     ft.DataCell(
                         ft.Row(
                             [
