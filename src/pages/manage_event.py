@@ -71,7 +71,7 @@ class EventManagerApp:
         )
 
     def create_widgets(self):
-        self.add_button = CreateNewEvent(on_click_action=self.add_event)
+        self.add_button = CreateNewEvent(on_click_action=self.add_event, font_family="Default_Bold")
         self.prev_button = ft.ElevatedButton(text="Previous", on_click=self.prev_page)
         self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page)
 
