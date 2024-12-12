@@ -98,3 +98,4 @@ class BudgetForm:
                 self.display_error_message(f"Field '{field}' cannot be empty.")
                 return False
         return True
+

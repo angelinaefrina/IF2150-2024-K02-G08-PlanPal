@@ -270,5 +270,6 @@ class EventManagerApp:
 def main(page: ft.Page):
     app = EventManagerApp(page)
 
+
 if __name__ == "__main__":
     ft.app(target=main)
