@@ -39,3 +39,10 @@ class ControllerVendor:
         if not vendors:
             print(f"Tidak ada vendor yang ditemukan untuk EventID {event_id}.")
         return vendors
+    
+    def get_all_vendor(self):
+        vendors = [vendor for vendor in self.vendor_database]
+
+        if not vendors:
+            print(f"Tidak ada vendor yang ditemukan.")
+        return vendors
