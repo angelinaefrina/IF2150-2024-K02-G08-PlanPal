@@ -23,6 +23,26 @@ class BudgetPage:
             )
         print("=============================")
 
+    def display_all_budget(self):
+        print(f"=== Anggaran ===")
+        event_budgets = [
+            budget for budget in self.controller_budget.budget_database
+        ]
+
+        if not event_budgets:
+            print(f"Tidak ada anggaran yang ditemukan.")
+            return
+
+        for budget in event_budgets:
+            total_cost = budget["RequirementBudget"] * budget["RequirementQuantity"]
+            print(
+                f"- Requirement: {budget['RequirementName']}, "
+                f"Budget per Unit: {budget['RequirementBudget']}, "
+                f"Quantity: {budget['RequirementQuantity']}, "
+                f"Total Cost: {total_cost}"
+            )
+        print("=============================")
+
     def display_edit_budget(self, event_id):
         print(f"=== Edit Anggaran untuk EventID {event_id} ===")
         requirement_name = input("Masukkan nama kebutuhan yang ingin diubah: ")
@@ -43,12 +63,11 @@ class BudgetPage:
         print(f"- Budget per Unit: {budget_found['RequirementBudget']}")
         print(f"- Quantity: {budget_found['RequirementQuantity']}")
         
-        # Input perubahan
         try:
             new_budget = int(input("Masukkan anggaran baru per unit (tekan Enter untuk melewati): ") or budget_found["RequirementBudget"])
             new_quantity = int(input("Masukkan jumlah baru (tekan Enter untuk melewati): ") or budget_found["RequirementQuantity"])
             
-            # Memperbarui anggaran
+           
             self.controller_budget.edit_budget(event_id, requirement_name, new_budget=new_budget, new_quantity=new_quantity)
         except ValueError:
             print("Input tidak valid. Pastikan memasukkan angka untuk anggaran dan jumlah.")
