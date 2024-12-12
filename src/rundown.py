@@ -14,7 +14,7 @@ class Rundown:
         end = datetime.combine(datetime.today(), end_time)
         if end < start:
             end += timedelta(days=1)
-        return (end - start).total_seconds // 60
+        return (end - start).total_seconds() // 60
 
     def get_rundown(self):
         return {
