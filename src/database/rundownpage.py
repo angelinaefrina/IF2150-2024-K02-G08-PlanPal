@@ -3,10 +3,12 @@ from src.utils.buttons import *
 
 class RundownPage:
     def __init__(self):
-        self
         self.rundown_details = None
 
-    def display_form(self, page, on_submit, rundown_data=None, is_edit=False, original_event_id=None):
+    def display_form(self, page, on_submit, event_id, rundown_data=None, is_edit=False, original_event_id=None):
+        if not callable(on_submit):
+            raise TypeError("on_submit must be a callable function.")
+        
         print("Displaying rundown form with rundown data...", rundown_data)
 
         # Set default
@@ -29,7 +31,7 @@ class RundownPage:
                 height=300,
             ),
             actions=[
-                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, event_id)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page)),
             ]
         )
@@ -44,11 +46,19 @@ class RundownPage:
             e.control.error_text = None
         e.control.update()
 
-    def submit_form(self, page, event_id, on_submit, is_edit):
+    def validate_time_format(self, time_string):
+        from datetime import datetime
+        try:
+            datetime.strptime(time_string, "%H:%M")
+            return True
+        except ValueError:
+            return False
+
+    def submit_form(self, page, on_submit, is_edit, event_id):
         print("Submitting form...")
         try:
             # Collecting values from the form
-            event_id = event_id
+            # event_id = event_id
             # if isinstance(event_id, int):
             #     pass
             # elif event_id.isdigit():
@@ -57,12 +67,17 @@ class RundownPage:
             #     raise ValueError("Event ID must be a valid number.")
 
             form_data = {
-                # "EventID": int(event_id),
-                "AgendaName": self.dialog.content.controls[1].value,
-                "AgendaTimeStart": self.dialog.content.controls[2].value,
-                "AgendaTimeEnd": self.dialog.content.controls[3].value,
-                "AgendaPIC": self.dialog.content.controls[4].value,
+                "EventID": event_id,
+                "AgendaName": self.dialog.content.controls[0].value,
+                "AgendaTimeStart": self.dialog.content.controls[1].value,
+                "AgendaTimeEnd": self.dialog.content.controls[2].value,
+                "AgendaPIC": self.dialog.content.controls[3].value,
             }
+
+            # Validasi waktu
+            if not self.validate_time_format(form_data["AgendaTimeStart"]) or not self.validate_time_format(form_data["AgendaTimeEnd"]):
+                self.display_error_message("Invalid time format. Use HH:MM.")
+                return
 
             # Validate the form data
             if self.validate_form_data(form_data):

@@ -7,6 +7,7 @@ from src.database.rundownpage import RundownPage
 from src.database.rundowncontroller import RundownController
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
+from datetime import datetime
 
 ITEMS_PER_PAGE = 5
 class RundownManagerApp:
@@ -223,20 +224,27 @@ class RundownManagerApp:
 
     def on_form_submit(self, form_data, is_edit, event_id):
         # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
+        try:
+            agenda_time_start = datetime.strptime(form_data["AgendaTimeStart"], "%H:%M")
+            agenda_time_end = datetime.strptime(form_data["AgendaTimeEnd"], "%H:%M")
+        except ValueError as e:
+            self.show_error_dialog(f"Invalid time format: {e}")
+            return
+        
         if is_edit:
             self.controller.edit_rundown(
                 event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
-                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
+                agenda_time_start.strftime("%H:%M"),
+                agenda_time_end.strftime("%H:%M"),
                 form_data["AgendaPIC"]
             )
         else:
             self.controller.add_rundown(
                 event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
-                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
+                agenda_time_start.strftime("%H:%M"),
+                agenda_time_end.strftime("%H:%M"),
                 form_data["AgendaPIC"]
             )
         self.update_display()
