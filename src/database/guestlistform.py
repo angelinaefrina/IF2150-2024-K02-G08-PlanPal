@@ -24,8 +24,7 @@ class GuestListForm:
                             options=[
                             ft.dropdown.Option("Hadir"), 
                             ft.dropdown.Option("Tidak Hadir"), 
-                            ft.dropdown.Option("Menyusul"),
-                            ft.dropdown.Option("Meninggalkan")
+                            ft.dropdown.Option("Menyusul")
                             ], 
                             value=rsvp_status, color="#4539B4"),
                 ],
