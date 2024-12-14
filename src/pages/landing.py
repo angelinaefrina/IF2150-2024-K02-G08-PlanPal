@@ -48,9 +48,9 @@ class LandingApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "./src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "./src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "./src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "../assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "../assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "../assets/fonts/Afacad/Afacad-Regular.ttf",
         }
 
         # Add the header (PlanPal text) at the top of the page
