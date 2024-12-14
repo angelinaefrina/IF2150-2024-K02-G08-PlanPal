@@ -24,8 +24,8 @@ class RundownPage:
             content=ft.Column([
                 # ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
                 ft.TextField(label="Agenda Name", value=agenda_name, color="#4539B4"),
-                ft.TextField(label="Start Time", value=agenda_time_start, color="#4539B4"),
-                ft.TextField(label="End Time", value=agenda_time_end, color="#4539B4"),
+                ft.TextField(label="Start Time (HH:MM)", value=agenda_time_start, color="#4539B4"),
+                ft.TextField(label="End Time (HH:MM)", value=agenda_time_end, color="#4539B4"),
                 ft.TextField(label="PIC", value=agenda_pic, color="#4539B4"),
             ],
                 height=300,
