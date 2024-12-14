@@ -27,7 +27,7 @@ class ControllerVendor:
 
         if self.validate_vendor(vendor_data):
             # self.vendor_db.update_vendor(vendor_data)
-            self.vendor_db.delete_vendor(event_id, vendor_name, vendor_contact, vendor_product)
+            self.vendor_db.delete_vendor(event_id, vendor_name)
             self.vendor_db.add_vendor(event_id, vendor_name, vendor_contact, vendor_product)
             print(f"Vendor '{vendor_name}' berhasil diperbarui untuk EventID {event_id}.")
         else:
