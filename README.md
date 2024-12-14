@@ -60,9 +60,7 @@ python planpal.py
 
 
 ### Modul Guest List
-;; ![Guest List Details](test/nama_file.png)  
-;; ![Add Guest List](test/nama_file.png)  
-;; ![Edit Guest List](test/nama_file.jpg) 
+
 
 
 ### Modul Rundown
