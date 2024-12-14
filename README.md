@@ -39,8 +39,12 @@ python planpal.py
 
 ## Daftar Modul
 
-### Modul X
-### Modul X
+### Modul Event
+### Modul Anggaran
+### Modul Vendor
+### Modul Guest List
+### Modul Rundown
+
 ### Pembagian Tugas
 
 | No | Fitur   | NIM |
@@ -53,8 +57,8 @@ python planpal.py
 | 6  | Mengelola  Daftar Tamu  | 13523078 |
 | 7  | Mengelola Rundown | 13523060 |
 | 8  | UI/UX | 13523050, 13523060 |
-| 9  | Database | 13523010 |
-| 10 | Integrasi | 13523060, 13523070 |
+| 9  | Database | 13523010, 13523070 |
+| 10 | Integrasi | 13523060, 13523070, 13523050, 13523078 |
 
 
 
@@ -70,6 +74,7 @@ python planpal.py
 ## Tabel dan Atribut
 
 ### Tabel 1: Event
+![Event](/my-image.png)
 
 Tabel ini berisi data event
 
