@@ -1,3 +1,5 @@
+import flet as ft
+
 class GuestController:
     def __init__(self):
         self.guest_list = []
@@ -64,10 +66,11 @@ class GuestController:
         return self.guest_list
     
     def get_guest_list(self, event_id, guest_id):
-        for guest in self.guest_list:
-            if guest["EventID"] == event_id and guest["GuestID"] == guest_id:
-                return guest
-        return None
-    
-    def get_event_guest_list(self, event_id):
-        return [guest for guest in self.guest_list if guest["EventID"] == event_id]
+        guests = [guest for guest in self.guest_list if guest["EventID"] == event_id]
+        if guests:
+            return guests[guest_id]
+        else:
+            print(f"No guests found for EventID {event_id}.")
+            return []
+
+
