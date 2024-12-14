@@ -10,7 +10,7 @@ from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
 class RundownManagerApp:
-    def __init__(self, page, event_id):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Rundown Management"
         self.event_id = event_id
@@ -18,9 +18,13 @@ class RundownManagerApp:
         # Setup page
         self.setup_page()
 
-        # Initialize Controller and Page
-        self.rundown_controller = RundownController()
-        self.rundown_page = RundownPage(self.rundown_controller)
+        self.controller = RundownController(rundown_db)
+        self.rundown_form = RundownPage()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         self.current_page = 0
         self.create_widgets()
@@ -141,7 +145,7 @@ class RundownManagerApp:
         )
 
     def add_rundown(self, e, event_id):
-        self.rundown_page.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
+        self.rundown_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
         
     def back_to_event_manager(self, e):
         from pages.manage_event import EventManagerApp
@@ -152,7 +156,7 @@ class RundownManagerApp:
         self.page.update()
 
     def edit_rundown(self, event_id, agenda_name):
-        rundowns = self.rundown_controller.get_rundown_list(event_id)
+        rundowns = self.controller.get_rundown_list(event_id)
 
         print(f"Editing rundown {agenda_name} for event {event_id}")
         rundown_data = next(
@@ -160,7 +164,7 @@ class RundownManagerApp:
         )
 
         if rundown_data:
-            self.rundown_page.display_form(
+            self.rundown_form.display_form(
                 page= self.page,
                 on_submit= self.on_form_submit,
                 event_id= event_id,
@@ -171,12 +175,12 @@ class RundownManagerApp:
             self.show_error_dialog("Rundown not found.")
 
     def delete_rundown(self, event_id, agenda_name):
-        if self.rundown_controller.get_rundown_list(event_id):
-            self.rundown_controller.delete_rundown(event_id, agenda_name)
+        if self.controller.get_rundown_list(event_id):
+            self.controller.delete_rundown(event_id, agenda_name)
             self.update_display()
 
     def update_display(self):
-        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -184,7 +188,7 @@ class RundownManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = self.current_page + ITEMS_PER_PAGE
 
-        rundowns = self.rundown_controller.get_all_rundown_list()
+        rundowns = self.controller.get_all_rundown_list()
         self.tree.rows.clear()
         for rundown in rundowns[start_index:end_index]:
             self.tree.rows.append(
@@ -224,7 +228,7 @@ class RundownManagerApp:
     def on_form_submit(self, form_data, is_edit, event_id):
         # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
         if is_edit:
-            self.rundown_controller.edit_rundown(
+            self.controller.edit_rundown(
                 event_id,
                 form_data["AgendaName"],
                 form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
@@ -232,7 +236,7 @@ class RundownManagerApp:
                 form_data["AgendaPIC"]
             )
         else:
-            self.rundown_controller.add_rundown(
+            self.controller.add_rundown(
                 event_id,
                 form_data["AgendaName"],
                 form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
