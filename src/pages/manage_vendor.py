@@ -7,7 +7,7 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.database.vendorForm import VendorForm
 
-ITEMS_PER_PAGE = 6
+ITEMS_PER_PAGE = 5
 
 class VendorManagerApp:
     def __init__(self, page):

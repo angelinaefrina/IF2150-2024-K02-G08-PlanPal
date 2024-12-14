@@ -7,7 +7,7 @@ from src.database.guestlistform import GuestListForm
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 
-ITEMS_PER_PAGE = 6
+ITEMS_PER_PAGE = 5
 class GuestManagerApp:
     def __init__(self, page):
         self.page = page
