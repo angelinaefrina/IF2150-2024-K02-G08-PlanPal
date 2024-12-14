@@ -2,7 +2,7 @@ import sys
 import os
 
 # Add the src directory to the sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import flet as ft
 from guestcontroller import GuestController
@@ -12,19 +12,20 @@ from utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 6
 class GuestManagerApp:
-    def __init__(self, page: ft.Page):
+    def __init__(self, page):
         self.page = page
-        self.page.title = "Guest List Management"
-        
+        self.page.title = "Guest Management"
+
         # Setup page
         self.setup_page()
-        
+
         self.controller = GuestController()
         self.guest_list_form = GuestListForm()
-        # self.guest_list_container = ft.Container()
 
-        self.controller.add_guest_list()
-        self.controller.add_guest_list()
+        self.controller.add_guest_list(1, "Alice", "Hadir")
+        self.controller.add_guest_list(1, "Bob", "Menyusul")
+        self.controller.add_guest_list(1, "Charlie", "Tidak Hadir")
+        self.controller.display_guest_list(1)
 
         # Pagination variables
         self.current_page = 0
@@ -38,9 +39,9 @@ class GuestManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "./src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "./src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "./src/assets/fonts/Afacad/Afacad-Regular.ttf",
         }
         # Header PlanPal
         self.page.add(
@@ -68,7 +69,7 @@ class GuestManagerApp:
             ],
             rows=[],
             bgcolor="#FFF5E9",
-            heading_row_color="FAEBD9"
+            heading_row_color="#FAEBD9"
         )
 
         self.title = ft.Text(
@@ -95,7 +96,7 @@ class GuestManagerApp:
             on_click=self.add_guest
         )
 
-        self.prev_button = ft.ElevatedButton("Previous", on_click=self.previous_page, disabled=True)
+        self.prev_button = ft.ElevatedButton("Previous", on_click=self.prev_page, disabled=True)
         self.next_button = ft.ElevatedButton("Next", on_click=self.next_page, disabled=True)
         
         self.page.add(
@@ -128,30 +129,30 @@ class GuestManagerApp:
         )
 
     def add_guest(self, e):
-        self.guest_list_form.display_form(self.page, self.submit_form, is_edit=False)
+        self.guest_list_form.display_form(self.page, self.on_form_submit, is_edit=False)
 
-    def edit_budget(self, event_id, guest_name):
+    def edit_guest(self, event_id, guest_id):
         print(f"Editing budget for EventID: {event_id}")
         guest_list = self.controller.get_guest_list(event_id)
-
+        
         guest_data = next(
-            (guest for guest in guest_list if guest["GuestName"] == guest_name), None
+            (guest for guest in guest_list if guest["GuestID"] == guest_id), None
         )
 
         if guest_data:
             self.guest_list_form.display_form(
                 page=self.page, 
-                on_submit=self.on_submit_form, 
-                guest_data=guest_data, 
+                on_submit=self.on_form_submit, 
+                guest_list_data=guest_data, 
                 is_edit=True, 
                 original_event_id=event_id,
             )
         else:
             self.show_error_dialog("Guest not found.")
     
-    def delete_guest(self, event_id, guest_name):
+    def delete_guest(self, event_id, guest_id):
         if self.controller.get_guest_list(event_id):
-            self.controller.delete_guest_list(event_id, guest_name)
+            self.controller.delete_guest_list(event_id, guest_id)
             self.update_display()
         else:
             self.show_error_dialog("Guest not found.")
@@ -177,8 +178,8 @@ class GuestManagerApp:
                             ft.Row(
                                 controls=
                                     [
-                                        EditButton(on_click=lambda e, event_id=guest["EventID"], guest_name=guest["GuestName"]: self.edit_guest(event_id, guest_name)),
-                                        DeleteButton(on_click=lambda e, event_id=guest["EventID"], guest_name=guest["GuestName"]: self.delete_guest(event_id, guest_name)),
+                                        EditButton(on_click_action=lambda e, event_id=guest["EventID"], guest_id=guest["GuestID"]: self.edit_guest(event_id, guest_id)),
+                                        DeleteButton(on_click_action=lambda e, event_id=guest["EventID"], guest_id=guest["GuestID"]: self.delete_guest(event_id, guest_id)),
                                     ]
                             )
                         ),
@@ -206,7 +207,7 @@ class GuestManagerApp:
         """Go to the previous page."""
         if self.current_page > 1:
             self.current_page -= 1
-            self.update_guest_list()
+            self.update_display()
             self.page.update()
 
     def next_page(self, e):
@@ -214,7 +215,7 @@ class GuestManagerApp:
         total_pages = len(self.controller.guest_list) // self.guests_per_page + 1
         if self.current_page < total_pages:
             self.current_page += 1
-            self.update_guest_list()
+            self.update_display()
             self.page.update()
 
     def show_error_dialog(self, message):
@@ -245,6 +246,8 @@ class GuestManagerApp:
         self.page.dialog.open = False
         self.page.update()
 
+
+    
 def main(page: ft.Page):
     app = GuestManagerApp(page)
 
