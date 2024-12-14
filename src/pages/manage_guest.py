@@ -114,12 +114,6 @@ class GuestManagerApp:
                         alignment=ft.alignment.top_left,
                         padding=ft.padding.all(10),
                     ),
-
-                    ft.Container(
-                        content=self.back_button,
-                        alignment=ft.alignment.top_left,
-                        padding=ft.padding.all(10),
-                    ),
                     ft.Container(
                         content= self.title,
                         alignment= ft.alignment.center,
@@ -154,7 +148,7 @@ class GuestManagerApp:
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
         
     def edit_guest(self, event_id, guest_id):
@@ -169,7 +163,8 @@ class GuestManagerApp:
             self.guest_list_form.display_form(
                 page=self.page, 
                 on_submit=self.on_form_submit,
-                event_id=event_id, 
+                event_id=event_id,
+                guest_id=guest_id, 
                 guest_list_data=guest_data, 
                 is_edit=True, 
             )
@@ -215,10 +210,11 @@ class GuestManagerApp:
             )
         self.page.update()
 
-    def on_form_submit(self, form_data, is_edit, event_id):
+    def on_form_submit(self, form_data, is_edit, event_id, guest_id):
         if is_edit:
             self.controller.edit_guest_list(
-                event_id, 
+                event_id,
+                guest_id, 
                 form_data["GuestName"],
                 form_data["RSVPStatus"]
                 )
