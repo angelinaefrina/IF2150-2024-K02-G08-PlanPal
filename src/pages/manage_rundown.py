@@ -114,11 +114,6 @@ class RundownManagerApp:
                         padding=ft.padding.all(10),
                     ),
                     ft.Container(
-                        content=self.back_button,
-                        alignment=ft.alignment.top_left,
-                        padding=ft.padding.all(10),
-                    ),
-                    ft.Container(
                         content= self.title,
                         alignment= ft.alignment.center,
                         padding= ft.padding.only(bottom=10),
