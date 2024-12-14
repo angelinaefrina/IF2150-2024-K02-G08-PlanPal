@@ -19,7 +19,7 @@ class VendorManagerApp:
         # Setup page
         self.setup_page()
 
-        self.controller = ControllerVendor()
+        self.controller = ControllerVendor(vendor_db)
         self.vendor_form = VendorForm()
         self.event_db = event_db
         self.guest_list_db = guest_list_db
@@ -27,8 +27,10 @@ class VendorManagerApp:
         self.vendor_db = vendor_db
         self.rundown_db = rundown_db
 
-        self.controller.add_vendor(1, "Vendor A", "0852", "baju")
-        self.controller.add_vendor(2, "Vendor B", "idline", "lanyard")
+
+        # Sample
+        # self.controller.add_vendor(1, "Vendor A", "0852", "baju")
+        # self.controller.add_vendor(2, "Vendor B", "idline", "lanyard")
 
         self.current_page = 0
         self.create_widgets()
@@ -158,7 +160,7 @@ class VendorManagerApp:
 
         print(f"Vendors retrieved for EventID {event_id}: {vendors}")
         vendor_data = next(
-            (vendor for vendor in vendors if vendor["VendorName"] == vendor_name), None
+            (vendor for vendor in vendors if vendor[1] == vendor_name), None
         )
 
         if vendor_data:
@@ -196,17 +198,17 @@ class VendorManagerApp:
             self.tree.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(vendor["VendorName"])),
-                        ft.DataCell(ft.Text(vendor["VendorContact"])),
-                        ft.DataCell(ft.Text(vendor["VendorProduct"])),
+                        ft.DataCell(ft.Text(vendor[1])),
+                        ft.DataCell(ft.Text(vendor[2])),
+                        ft.DataCell(ft.Text(vendor[3])),
                         ft.DataCell(
                             ft.Row(
                                 controls=[
                                     EditButton(
-                                        on_click_action=lambda e, event_id=vendor["EventID"], vendor_name=vendor["VendorName"]: self.edit_vendor(event_id, vendor_name)
+                                        on_click_action=lambda e, event_id=vendor[0], vendor_name=vendor[1]: self.edit_vendor(event_id, vendor_name)
                                     ),
                                     DeleteButton(
-                                        on_click_action=lambda e, event_id=vendor["EventID"], vendor_name=vendor["VendorName"]: self.delete_vendor(event_id, vendor_name)
+                                        on_click_action=lambda e, event_id=vendor[0], vendor_name=vendor[1]: self.delete_vendor(event_id, vendor_name)
                                     ),
                                 ]
                             )
