@@ -92,12 +92,21 @@ class VendorManagerApp:
             on_click=self.add_vendor
         )
 
+        self.back_button = BackButton(
+        on_click_action=self.back_to_event_manager, font_family="Default_Bold"
+        )
+
         self.prev_button = ft.ElevatedButton(text="Previous", on_click=self.prev_page, disabled=True)
         self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page, disabled=True)
 
         self.page.add(
             ft.Column(
                 [   
+                    ft.Container(
+                        content=self.back_button,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.padding.all(10),
+                    ),
                     ft.Container(
                         content=self.title,
                         alignment=ft.alignment.center,
@@ -127,6 +136,14 @@ class VendorManagerApp:
     def add_vendor(self, e):
         print("Add Vendor button clicked.")
         self.vendor_form.display_form(self.page, self.on_form_submit, is_edit=False)
+
+    def back_to_event_manager(self, e):
+        from src.pages.manage_event import EventManagerApp
+        # Clear current page content
+        self.page.controls.clear()
+        # Load EventManagerApp
+        EventManagerApp(self.page)
+        self.page.update()
 
     def edit_vendor(self, event_id, vendor_name):
         print("Edit Vendor button clicked.")
