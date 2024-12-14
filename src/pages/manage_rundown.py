@@ -95,7 +95,7 @@ class RundownManagerApp:
                 )
             ),
             color= '#4539B4',
-            on_click= self.add_rundown
+            on_click=lambda e: self.add_rundown(e, self.event_id)
         )
         
         self.back_button = BackButton(
@@ -152,7 +152,7 @@ class RundownManagerApp:
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def edit_rundown(self, event_id, agenda_name):
@@ -220,7 +220,8 @@ class RundownManagerApp:
             self.update_display()
 
     def next_page(self, e):
-        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_rundown = self.controller.get_rundown_list(1)
+        total_pages = (len(total_rundown) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
         if self.current_page < total_pages - 1:
             self.current_page += 1
             self.update_display()
