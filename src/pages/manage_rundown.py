@@ -270,7 +270,7 @@ class RundownManagerApp:
         self.page.update()
 
 
-def main(page: ft.Page):
-    app = RundownManagerApp(page)
+# def main(page: ft.Page):
+#     app = RundownManagerApp(page, event_id)
 
-ft.app(target=main)
+# ft.app(target=main)

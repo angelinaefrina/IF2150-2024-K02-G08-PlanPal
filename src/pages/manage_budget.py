@@ -12,7 +12,7 @@ from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
 class BudgetManagerApp:
-    def __init__(self, page, event_id):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Budget Management"
         self.event_id = event_id
@@ -22,6 +22,11 @@ class BudgetManagerApp:
 
         self.controller = ControllerBudget()
         self.budget_form = BudgetForm()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         self.controller.add_budget(1, "Benda A", 1000, 10)
         self.controller.add_budget(2, "Benda B", 2000, 5)
@@ -148,7 +153,7 @@ class BudgetManagerApp:
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def edit_budget(self, event_id, requirement_name):
@@ -196,20 +201,20 @@ class BudgetManagerApp:
                 ft.DataRow(
                     cells=
                         [
-                        ft.DataCell(ft.Text(budget["EventID"])),
-                        ft.DataCell(ft.Text(budget["RequirementName"])),
-                        ft.DataCell(ft.Text(budget["RequirementBudget"])),
-                        ft.DataCell(ft.Text(budget["RequirementQuantity"])),
+                        ft.DataCell(ft.Text(budget[1])),
+                        ft.DataCell(ft.Text(budget[2])),
+                        ft.DataCell(ft.Text(budget[3])),
+                        ft.DataCell(ft.Text(budget[4])),
                         ft.DataCell(ft.Text(total_cost)),
                         ft.DataCell(
                             ft.Row(
                                 controls=
                                     [
                                         EditButton(
-                                            on_click_action=lambda e, event_id=budget["EventID"], requirement_name=budget["RequirementName"]: self.edit_budget(event_id, requirement_name)
+                                            on_click_action=lambda e, event_id=budget[0], requirement_name=budget[1]: self.edit_budget(event_id, requirement_name)
                                         ),
                                         DeleteButton(
-                                            on_click_action=lambda e, event_id=budget["EventID"], requirement_name=budget["RequirementName"]: self.delete_budget(event_id, requirement_name)
+                                            on_click_action=lambda e, event_id=budget[0], requirement_name=budget[1]: self.delete_budget(event_id, requirement_name)
                                         ),
                                     ]
                                 )
@@ -225,7 +230,7 @@ class BudgetManagerApp:
             self.update_display()
 
     def next_page(self, e):
-        total_budgets = self.controller.get_all_budget_list()
+        total_budgets = self.controller.get_all_budget_list(self.event_id)
         total_pages = (len(total_budgets) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
         if self.current_page < total_pages - 1:
             self.current_page += 1
@@ -276,8 +281,8 @@ class BudgetManagerApp:
         self.page.dialog.open = False
         self.page.update()
 
-def main(page: ft.Page):
-    app = BudgetManagerApp(page, 1)
+# def main(page: ft.Page):
+#     app = BudgetManagerApp(page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
     
-if __name__ == "__main__":
-    ft.app(target=main)
+# if __name__ == "__main__":
+#     ft.app(target=main)

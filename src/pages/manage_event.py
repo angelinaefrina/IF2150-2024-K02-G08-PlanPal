@@ -115,7 +115,7 @@ class EventManagerApp:
                     spacing=20,
                     alignment=ft.MainAxisAlignment.START
                 ),
-                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
+                actions=[ft.TextButton("Lihat Anggaran", on_click=lambda e: self.open_budget_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Lihat Rundown", on_click=self.open_rundown_page),
                          ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Tamu", on_click=self.open_guest_page)
@@ -267,11 +267,11 @@ class EventManagerApp:
             self.dialog.open = False
             self.page.update()
 
-    def open_budget_page(self, e):
+    def open_budget_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
         if self.dialog:
             self.dialog.open = False
-        BudgetManagerApp(self.page)
+        BudgetManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
     def open_guest_page(self, e):
