@@ -42,6 +42,45 @@ class EventCard(ft.Card):
         )
         self.elevation = 2
 
+class LandingCard(ft.Card):
+    def __init__(self, event_title, event_date, on_view_details_click=None, on_edit_click=None, on_delete_click=None, font_family=None):
+        super().__init__()
+        # fonts = 
+        self.content = ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Text(f"{event_date}", size=20, weight=ft.FontWeight.BOLD, font_family=font_family),
+                            ft.Container(
+                                content= ft.Text(event_title, size=26, font_family="Default_Bold", max_lines=2, overflow=ft.TextOverflow.ELLIPSIS),
+                                width= 200
+                            )
+                        ],
+                        spacing=20, 
+                    ),
+                    ft.Row(
+                        controls=[
+                            # Use your custom button classes here
+                            # CreateNewEvent().content,
+                            ViewDetailsButton(on_click_action=on_view_details_click, font_family=font_family),
+                        ],
+                        spacing=10,
+                    ),
+                ],
+                spacing=10,
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            width=350,
+            height=150,
+            padding=20,
+            border_radius=8,
+            bgcolor="#F9F9F9",
+            alignment=ft.alignment.center,
+        )
+        self.elevation = 2
+
+
 # # Example usage of the EventCard class
 # def main(page: ft.Page):
 #     def on_view_details(e):
