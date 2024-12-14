@@ -170,10 +170,32 @@ class RundownManagerApp:
         else:
             self.show_error_dialog("Rundown not found.")
 
-    def delete_rundown(self, event_id, agenda_name):
-        if self.controller.get_rundown_list(event_id):
-            self.controller.delete_rundown(event_id, agenda_name)
-            self.update_display()
+    def delete_rundown(self, event_id, agenda_name, dialog=None):
+        """Menghapus rundown setelah konfirmasi."""
+        if dialog:
+            dialog.open = False  # Tutup dialog konfirmasi
+        self.controller.delete_rundown(event_id, agenda_name)
+        self.update_display()
+        self.page.update()
+
+    def confirm_delete_rundown(self, event_id, agenda_name):
+        """Menampilkan dialog konfirmasi sebelum menghapus rundown."""
+        confirmation_dialog = ft.AlertDialog(
+            title=ft.Text("Konfirmasi Penghapusan"),
+            content=ft.Text(f"Apakah Anda yakin ingin menghapus rundown '{agenda_name}' untuk Event ID {event_id}?"),
+            actions=[
+                ft.TextButton("Hapus", on_click=lambda e: self.delete_rundown(event_id, agenda_name, confirmation_dialog)),
+                ft.TextButton("Batal", on_click=lambda e: self.close_dialog(confirmation_dialog)),
+            ],
+        )
+        self.page.dialog = confirmation_dialog
+        confirmation_dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, dialog):
+        """Tutup dialog."""
+        dialog.open = False
+        self.page.update()
 
     def update_display(self):
         total_pages = (len(self.controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
@@ -201,7 +223,7 @@ class RundownManagerApp:
                                 controls=
                                 [
                                     EditButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.edit_rundown(event_id, agenda_name)),
-                                    DeleteButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.delete_rundown(event_id, agenda_name)),
+                                    DeleteButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.confirm_delete_rundown(event_id, agenda_name)),
                                 ]
                             )
                         ),
