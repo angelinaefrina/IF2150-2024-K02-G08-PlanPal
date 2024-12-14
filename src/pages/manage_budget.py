@@ -279,8 +279,6 @@ class BudgetManagerApp:
         self.page.dialog.open = False
         self.page.update()
 
-
-
 def main(page: ft.Page):
     app = BudgetManagerApp(page)
     
