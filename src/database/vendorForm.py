@@ -5,11 +5,11 @@ class VendorForm:
     def __init__(self):
         self.vendor_details = None
 
-    def display_form(self, page, on_submit, vendor_data=None, is_edit=False, original_event_id=None):
+    def display_form(self, page, on_submit, event_id, vendor_data=None, is_edit=False):
         print("Displaying form with vendor data:", vendor_data)
 
         # Set default values if vendor_data is None
-        event_id = str(vendor_data["EventID"]) if vendor_data else ""
+        event_id = event_id
         vendor_name = vendor_data["VendorName"] if vendor_data else ""
         vendor_contact = vendor_data["VendorContact"] if vendor_data else ""
         vendor_product = vendor_data["VendorProduct"] if vendor_data else ""
@@ -18,7 +18,7 @@ class VendorForm:
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Vendor" if is_edit else "Add Vendor"),
             content=ft.Column([
-                ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
+                # ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
                 ft.TextField(label="Vendor Name", value=vendor_name, color="#4539B4"),
                 ft.TextField(label="Contact", value=vendor_contact, color="#4539B4"),
                 ft.TextField(label="Product/Service", value=vendor_product, color="#4539B4"),
@@ -26,7 +26,7 @@ class VendorForm:
                 height=300,
             ),
             actions=[
-                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                SaveButton(on_click_action=lambda e: self.submit_form(page, event_id, on_submit, is_edit)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page)),
             ]
         )
@@ -41,24 +41,24 @@ class VendorForm:
             e.control.error_text = None
         e.control.update()
 
-    def submit_form(self, page, on_submit, is_edit, original_event_id):
+    def submit_form(self, page, event_id, on_submit, is_edit):
         """Handle form submission by validating and passing data to the controller."""
         print("Submitting form...")
         try:
             # Collecting values from the form
-            event_id = self.dialog.content.controls[0].value
-            if isinstance(event_id, int):
-                pass
-            elif event_id.isdigit():
-                event_id = int(event_id)  # Convert it to an integer if it's a string
-            else:
-                raise ValueError("Event ID must be a valid number.")
+            event_id = event_id
+            # if isinstance(event_id, int):
+            #     pass
+            # elif event_id.isdigit():
+            #     event_id = int(event_id)  # Convert it to an integer if it's a string
+            # else:
+            #     raise ValueError("Event ID must be a valid number.")
 
             form_data = {
-                "EventID": int(event_id),
-                "VendorName": self.dialog.content.controls[1].value,
-                "VendorContact": self.dialog.content.controls[2].value,
-                "VendorProduct": self.dialog.content.controls[3].value,
+                # "EventID": int(event_id),
+                "VendorName": self.dialog.content.controls[0].value,
+                "VendorContact": self.dialog.content.controls[1].value,
+                "VendorProduct": self.dialog.content.controls[2].value,
             }
 
             # Validate the form data
@@ -71,11 +71,11 @@ class VendorForm:
 
                 # If editing, we update the existing entry; if adding, we add a new entry
                 if is_edit:
-                    print(f"Editing vendor for EventID: {original_event_id}")
-                    on_submit(form_data, is_edit, original_event_id)  # Update existing entry
+                    print(f"Editing vendor for EventID: {event_id}")
+                    on_submit(form_data, is_edit, event_id)  # Update existing entry
                 else:
                     print("Adding new vendor")
-                    on_submit(form_data, is_edit, original_event_id=None)  # Add new entry
+                    on_submit(form_data, is_edit, event_id)  # Add new entry
             else:
                 self.display_error_message("Form data is invalid.")
         except ValueError as e:
@@ -91,7 +91,7 @@ class VendorForm:
 
     def validate_form_data(self, form_data):
         # Ensure that all required fields are filled out
-        required_fields = ["EventID", "VendorName", "VendorContact", "VendorProduct"]
+        required_fields = ["VendorName", "VendorContact", "VendorProduct"]
         for field in required_fields:
             if field not in form_data or not form_data[field]:
                 self.display_error_message(f"Field '{field}' cannot be empty.")

@@ -7,11 +7,12 @@ from src.database.guestlistform import GuestListForm
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 
-ITEMS_PER_PAGE = 6
+ITEMS_PER_PAGE = 5
 class GuestManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_id):
         self.page = page
         self.page.title = "Guest Management"
+        self.event_id = event_id
 
         # Setup page
         self.setup_page()
@@ -90,7 +91,7 @@ class GuestManagerApp:
                 )
             ),
             color="#4539B4",
-            on_click=self.add_guest
+            on_click=lambda e: self.add_guest(e, self.event_id)
         )
 
         self.back_button = BackButton(
@@ -134,8 +135,8 @@ class GuestManagerApp:
             )
         )
 
-    def add_guest(self, e):
-        self.guest_list_form.display_form(self.page, self.on_form_submit, is_edit=False)
+    def add_guest(self, e, event_id):
+        self.guest_list_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
@@ -156,10 +157,10 @@ class GuestManagerApp:
         if guest_data:
             self.guest_list_form.display_form(
                 page=self.page, 
-                on_submit=self.on_form_submit, 
+                on_submit=self.on_form_submit,
+                event_id=event_id, 
                 guest_list_data=guest_data, 
                 is_edit=True, 
-                original_event_id=event_id,
             )
         else:
             self.show_error_dialog("Guest not found.")
@@ -202,16 +203,16 @@ class GuestManagerApp:
             )
         self.page.update()
 
-    def on_form_submit(self, form_data, is_edit, original_event_id):
+    def on_form_submit(self, form_data, is_edit, event_id):
         if is_edit:
             self.controller.edit_guest_list(
-                original_event_id, 
+                event_id, 
                 form_data["GuestName"],
                 form_data["RSVPStatus"]
                 )
         else:
             self.controller.add_guest_list(
-                form_data["EventID"],
+                event_id,
                 form_data["GuestName"], 
                 form_data["RSVPStatus"]
                 )
@@ -263,7 +264,7 @@ class GuestManagerApp:
 
     
 def main(page: ft.Page):
-    app = GuestManagerApp(page)
+    app = GuestManagerApp(page, 1)
 
 if __name__ == "__main__":
     ft.app(target=main)

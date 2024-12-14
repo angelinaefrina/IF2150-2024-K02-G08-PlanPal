@@ -7,12 +7,13 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.database.vendorForm import VendorForm
 
-ITEMS_PER_PAGE = 6
+ITEMS_PER_PAGE = 5
 
 class VendorManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_id):
         self.page = page
         self.page.title = "Vendor Management"
+        self.event_id = event_id
 
         # Setup page
         self.setup_page()
@@ -89,7 +90,7 @@ class VendorManagerApp:
                 )
             ),
             color="#4539B4", 
-            on_click=self.add_vendor
+            on_click=lambda e: self.add_vendor(e, self.event_id)
         )
 
         self.back_button = BackButton(
@@ -133,9 +134,9 @@ class VendorManagerApp:
             )
         )
 
-    def add_vendor(self, e):
+    def add_vendor(self, e, event_id):
         print("Add Vendor button clicked.")
-        self.vendor_form.display_form(self.page, self.on_form_submit, is_edit=False)
+        self.vendor_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
@@ -159,9 +160,9 @@ class VendorManagerApp:
             self.vendor_form.display_form(
                 page=self.page,
                 on_submit=self.on_form_submit,
+                event_id=event_id,
                 vendor_data=vendor_data,
                 is_edit=True,
-                original_event_id=event_id,
             )
             print(f"edit_vendor called with event_id={event_id}, vendor_name={vendor_name}")
         else:
@@ -222,17 +223,17 @@ class VendorManagerApp:
             self.current_page += 1
             self.update_display()
 
-    def on_form_submit(self, form_data, is_edit, original_event_id):
+    def on_form_submit(self, form_data, is_edit, event_id):
         if is_edit:
             self.controller.edit_vendor(
-                original_event_id, 
+                event_id, 
                 form_data["VendorName"], 
                 form_data["VendorContact"], 
                 form_data["VendorProduct"]
                 )
         else:
             self.controller.add_vendor(
-                form_data["EventID"], 
+                event_id, 
                 form_data["VendorName"], 
                 form_data["VendorContact"], 
                 form_data["VendorProduct"]
@@ -269,7 +270,7 @@ class VendorManagerApp:
 
 
 def main(page: ft.Page):
-    app = VendorManagerApp(page)
+    app = VendorManagerApp(page, 1)
 
 if __name__ == "__main__":
     ft.app(target=main)

@@ -15,6 +15,9 @@ from src.utils.pagesetup import PageSetup
 
 # Import Pages
 from src.pages.manage_budget import BudgetManagerApp
+from src.pages.manage_guest import GuestManagerApp
+from src.pages.manage_vendor import VendorManagerApp
+from src.pages.manage_rundown import RundownManagerApp
 
 ITEMS_PER_PAGE = 6
 
@@ -110,9 +113,9 @@ class EventManagerApp:
                     alignment=ft.MainAxisAlignment.START
                 ),
                 actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
-                         ft.TextButton("Lihat Rundown"),
-                         ft.TextButton("Daftar Vendor"),
-                         ft.TextButton("Daftar Tamu")
+                         ft.TextButton("Lihat Rundown", on_click=self.open_rundown_page),
+                         ft.TextButton("Daftar Vendor",  on_click=self.open_vendor_page),
+                         ft.TextButton("Daftar Tamu",  on_click=self.open_guest_page)
                         ]
             )
             page.dialog = self.dialog
@@ -263,6 +266,24 @@ class EventManagerApp:
         self.page.controls.clear()
         self.dialog.open = False
         BudgetManagerApp(self.page)
+        self.page.update()
+
+    def open_guest_page(self, e):
+        self.page.controls.clear()
+        self.dialog.open = False
+        GuestManagerApp(self.page)
+        self.page.update()
+
+    def open_vendor_page(self, e):
+        self.page.controls.clear()
+        self.dialog.open = False
+        VendorManagerApp(self.page)
+        self.page.update()
+
+    def open_rundown_page(self, e):
+        self.page.controls.clear()
+        self.dialog.open = False
+        RundownManagerApp(self.page)
         self.page.update()
 
 def main(page: ft.Page):
