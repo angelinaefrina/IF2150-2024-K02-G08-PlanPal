@@ -25,20 +25,27 @@ class EventDatabase(Database):
         query = """
         CREATE TABLE IF NOT EXISTS Event (
             EventID INTEGER PRIMARY KEY AUTOINCREMENT,
+            EventName TEXT NO NULL,
             EventLocation TEXT NOT NULL,
             EventDate DATE NOT NULL,
-            EventStatus TEXT NOT NULL CHECK(EventStatus IN ('Selesai', 'Belum dimulai', 'Berlangsung', 'Batal'))
+            EventStatus TEXT NOT NULL CHECK(EventStatus IN ('Sudah selesai', 'Belum dimulai', 'Sedang berlangsung', 'Batal'))
         );
         """
         self.execute_query(query)
 
-    def add_event(self, event_location, event_date, event_status):
+    def add_event(self, event_id, event_name, event_location, event_date, event_status):
         query = """
-        INSERT INTO Event (EventLocation, EventDate, EventStatus)
-        VALUES (?, ?, ?)
+        INSERT INTO Event (EventId, EventName, EventLocation, EventDate, EventStatus)
+        VALUES (?, ?, ?, ?, ?)
         """
-        parameters = (event_location, event_date, event_status)
+        parameters = (event_id, event_name, event_location, event_date, event_status)
         self.execute_query(query, parameters)
+    
+    def get_all_events(self):
+        query = """
+        SELECT * FROM Event
+        """
+        return self.fetch_query(query)
 
 # ------------------------------ Tabel GuestList ------------------------------
 class GuestListDatabase(Database):
@@ -166,20 +173,20 @@ class RundownDatabase(Database):
         """
         return self.fetch_query(query, (event_id,))
 
-# if __name__ == "__main__":
-#     database_name = "planpal.db"
-#     event_db = EventDatabase(database_name)
-#     event_db.create_event_table()
-#     guest_list_db = GuestListDatabase(database_name)
-#     guest_list_db.create_guest_list_table()
-#     budget_db = BudgetDatabase(database_name)
-#     budget_db.create_budget_table()
-#     vendor_db = VendorDatabase(database_name)
-#     vendor_db.create_vendor_table()
-#     rundown_db = RundownDatabase(database_name)
-#     rundown_db.create_rundown_table()
-#     event_db.close_connection()
-#     guest_list_db.close_connection()
-#     budget_db.close_connection()
-#     vendor_db.close_connection()
-#     rundown_db.close_connection()
+if __name__ == "__main__":
+    database_name = "planpal.db"
+    event_db = EventDatabase(database_name)
+    event_db.create_event_table()
+    guest_list_db = GuestListDatabase(database_name)
+    guest_list_db.create_guest_list_table()
+    budget_db = BudgetDatabase(database_name)
+    budget_db.create_budget_table()
+    vendor_db = VendorDatabase(database_name)
+    vendor_db.create_vendor_table()
+    rundown_db = RundownDatabase(database_name)
+    rundown_db.create_rundown_table()
+    event_db.close_connection()
+    guest_list_db.close_connection()
+    budget_db.close_connection()
+    vendor_db.close_connection()
+    rundown_db.close_connection()
