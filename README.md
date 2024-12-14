@@ -79,8 +79,8 @@ python planpal.py
 | 3  | Filter Daftar     | 13523078 |
 | 4  | Mengelola Anggaran    | 13523050 |
 | 5  | Mengelola Vendor | 13523010, 13523050 |
-| 6  | Mengelola  Daftar Tamu  | 13523078 |
-| 7  | Mengelola Rundown | 13523060 |
+| 6  | Mengelola  Daftar Tamu  | 13523078, 13523060 |
+| 7  | Mengelola Rundown | 13523060, 13523078 |
 | 8  | UI/UX | 13523050, 13523060 |
 | 9  | Database | 13523010, 13523070 |
 | 10 | Integrasi | 13523060, 13523070, 13523050, 13523078 |
