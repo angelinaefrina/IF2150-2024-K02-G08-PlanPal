@@ -40,10 +40,29 @@ python planpal.py
 ## Daftar Modul
 
 ### Modul Event
+(test/All_Events.png)
+(test/Event_Details.png)
+(test/Add_Events.png)
+(test/Add_Event_Success.png)
+(test/Edit_Events.png)
+
 ### Modul Anggaran
+(test/Anggaran_Details.png)
+(test/Add_Anggaran.png)
+(test/Edit_Anggaran.png)
+
 ### Modul Vendor
+(test/Vendor_Details.png)
+(test/Add_Vendor.png)
+(test/Edit_Vendor.png)
+
 ### Modul Guest List
+
+
 ### Modul Rundown
+(test/Rundown_Details.png)
+(test/Add_Rundown.png)
+(test/Edit_Rundown.png)
 
 ### Pembagian Tugas
 
