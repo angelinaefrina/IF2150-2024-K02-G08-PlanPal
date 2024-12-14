@@ -1,9 +1,9 @@
 import flet as ft
-from src.utils.buttons import *
+from utils.buttons import *
 
-class GuestListForm(ft.UserControl):
+class GuestListForm:
     def __init__(self):
-        self.budgets_details = None
+        self.guest_details = None
 
     def display_form(self, page, on_submit, guest_list_data=None, is_edit=False, original_event_id=None):
         print("Displaying form with guest list data:", guest_list_data)
@@ -17,14 +17,16 @@ class GuestListForm(ft.UserControl):
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Guest" if is_edit else "Add Guest"),
             content=ft.Column([
-                ft.TextField(label="Event ID", value=event_id, color="#4539B4"),
+                # ft.TextField(label="Event ID", value=event_id, color="#4539B4"),
                 ft.TextField(label="Guest Name", value=guest_name, color="#4539B4"),
-                ft.Dropdown(label="RSVP Status", options=[
-                    ft.dropdown.Option("Hadir"), 
-                    ft.dropdown.Option("Tidak Hadir"), 
-                    ft.dropdown.Option("Menyusul")], 
-                    value=rsvp_status, color="#4539B4"),
-            ],
+                ft.Dropdown(label="RSVP Status", 
+                            options=[
+                            ft.dropdown.Option("Hadir"), 
+                            ft.dropdown.Option("Tidak Hadir"), 
+                            ft.dropdown.Option("Menyusul")
+                            ], 
+                            value=rsvp_status, color="#4539B4"),
+                ],
                 height=300,
             ),
             actions=[
@@ -50,7 +52,7 @@ class GuestListForm(ft.UserControl):
                 raise ValueError("Event ID must be a valid number.")
 
             form_data = {
-                "EventID": int(event_id),
+                # "EventID": int(event_id),
                 "GuestName": self.dialog.content.controls[1].value,
                 "RSVPStatus": self.dialog.content.controls[2].value,
             }
