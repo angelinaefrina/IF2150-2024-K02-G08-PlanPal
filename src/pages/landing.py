@@ -16,6 +16,9 @@ from src.pages.manage_event import EventManagerApp
 
 # Import Pages
 from src.pages.manage_budget import BudgetManagerApp
+from src.pages.manage_guest import GuestManagerApp
+from src.pages.manage_vendor import VendorManagerApp
+from src.pages.manage_rundown import RundownManagerApp
 
 class LandingApp:
     def __init__(self, page, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
@@ -112,9 +115,9 @@ class LandingApp:
                     spacing=20,
                     alignment=ft.MainAxisAlignment.START
                 ),
-                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
+                actions=[ft.TextButton("Lihat Anggaran", on_click=lambda e: self.open_budget_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Lihat Rundown"),
-                         ft.TextButton("Daftar Vendor"),
+                         ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Tamu")
                         ]
             )
@@ -256,10 +259,32 @@ class LandingApp:
         self.page.dialog.open = False
         self.page.update()
 
-    def open_budget_page(self, e):
+    def open_budget_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        BudgetManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        BudgetManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
+        self.page.update()
+
+    def open_guest_page(self, e):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        GuestManagerApp(self.page)
+        self.page.update()
+
+    def open_vendor_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        VendorManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
+        self.page.update()
+
+    def open_rundown_page(self, e):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        RundownManagerApp(self.page)
         self.page.update()
 
 def main(page: ft.Page):
