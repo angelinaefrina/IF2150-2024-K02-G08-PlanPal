@@ -111,6 +111,11 @@ class BudgetManagerApp:
             ft.Column(
                 [   
                     ft.Container(
+                        content=self.back_button,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.padding.all(10),
+                    ),
+                    ft.Container(
                         content= self.title,
                         alignment= ft.alignment.center,
                         padding= ft.padding.only(bottom=10)
@@ -129,11 +134,6 @@ class BudgetManagerApp:
                         [self.prev_button, self.next_button],
                         alignment= ft.MainAxisAlignment.CENTER,
                         spacing= 20,
-                    ),
-                    ft.Container(
-                        content=self.back_button,
-                        alignment=ft.alignment.bottom_left,
-                        padding=ft.padding.all(10),
                     ),
                 ],
                 alignment=ft.MainAxisAlignment.START,
