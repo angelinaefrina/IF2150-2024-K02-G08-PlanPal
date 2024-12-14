@@ -102,8 +102,6 @@ class EventManagerApp:
             padding=ft.padding.only(right=20,top=10),
         )
 
-        self.page.add(self.dropdown_container)
-
     def sort_events_by_status(self,e):
         selected_status = e.control.value
         self.clear_dynamic_controls()
@@ -245,7 +243,7 @@ class EventManagerApp:
 
         self.page.add(
             ft.Column(
-                [   
+                controls=[   
                     ft.Text("All Events", font_family="Default_Bold", size=24, color="#4539B4"),
                     ft.Column(
                     controls=rows,

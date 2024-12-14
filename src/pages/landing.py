@@ -116,9 +116,9 @@ class LandingApp:
                     alignment=ft.MainAxisAlignment.START
                 ),
                 actions=[ft.TextButton("Lihat Anggaran", on_click=lambda e: self.open_budget_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
-                         ft.TextButton("Lihat Rundown"),
+                         ft.TextButton("Lihat Rundown", on_click=lambda e: self.open_rundown_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
-                         ft.TextButton("Daftar Tamu")
+                         ft.TextButton("Daftar Tamu", on_click=lambda e: self.open_guest_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db))
                         ]
             )
             page.dialog = self.dialog
