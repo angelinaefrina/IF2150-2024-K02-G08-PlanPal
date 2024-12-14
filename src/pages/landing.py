@@ -12,12 +12,12 @@ from src.database.controllerevent import ControllerEvent
 from src.utils.cards import EventCard
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
+from src.pages.manage_event import EventManagerApp
 
 # Import Pages
 from src.pages.manage_budget import BudgetManagerApp
-ITEMS_PER_PAGE = 6
 
-class EventManagerApp:
+class LandingApp:
     def __init__(self, page):
         self.page = page
         self.page.title = "PlanPal"
@@ -71,10 +71,8 @@ class EventManagerApp:
         )
 
     def create_widgets(self):
-        self.add_button = CreateNewEvent(on_click_action=self.add_event, font_family="Default_Bold")
-        self.prev_button = ft.ElevatedButton(text="Previous", on_click=self.prev_page)
-        self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page)
-
+        self.add_button = CreateNewEvent(on_click_action=self.add_event)
+        
     def add_event(self, e):
         self.form_event.display_form(self.page, self.on_form_submit, is_edit=False)
 
@@ -123,16 +121,13 @@ class EventManagerApp:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
     def update_display(self):
-        total_pages = len(self.event_display.event_list) // ITEMS_PER_PAGE + (1 if len(self.event_display.event_list) % ITEMS_PER_PAGE > 0 else 0)
-
         # Remove dynamic controls (event cards, etc.) if needed
         dynamic_controls = self.page.controls[1:]  # Assuming the header is the first control
         for control in dynamic_controls:
             self.page.controls.remove(control)
 
-        start_index = self.current_page * ITEMS_PER_PAGE
-        end_index = start_index + ITEMS_PER_PAGE
-        events_to_display = self.event_display.event_list[start_index:end_index]
+
+        events_to_display = self.event_display.event_list[0:3]
 
         rows = []
         row = []
@@ -151,49 +146,63 @@ class EventManagerApp:
 
         # self.page.add(display_container)
 
-        self.prev_button.disabled = self.current_page == 0
-        self.next_button.disabled = self.current_page >= total_pages - 1
-
         self.page.add(
             ft.Column(
                 [   
-                    ft.Text("All Events", font_family="Default_Bold", size=24, color="#4539B4"),
-                    ft.Column(
-                    controls=rows,
-                    spacing=20,
-                    alignment=ft.MainAxisAlignment.START,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    expand=True,
-                    ),
+                    # Welcome Message
+                    ft.Text("Welcome to PlanPal!", font_family="Default_Bold", size=64, color="#4539B4"),
+                    ft.Text("Manage all your events with PlanPal", font_family="Default_Bold", size=24, color="#4539B4"),
+                    ft.Text("Your Events", font_family="Default_Bold", size=24, color="#4539B4"),
+
+                    # Event Cards and Arrow Button Row
                     ft.Row(
-                        [
-                            self.prev_button,
-                            self.next_button,
+                        controls=[
+                            # Event Cards (organized in a row or grid)
+                            ft.Row(
+                                controls=rows,
+                                spacing=20,
+                                alignment=ft.MainAxisAlignment.START,
+                                expand=True,
+                            ),
+                            # Arrow Button
+                            ft.Container(
+                                content=ft.IconButton(
+                                    icon=ft.icons.ARROW_CIRCLE_RIGHT_OUTLINED,
+                                    style=ft.ButtonStyle(
+                                        padding=ft.padding.symmetric(horizontal=10, vertical=10),
+                                        bgcolor="transparent",
+                                        shape=ft.RoundedRectangleBorder(radius=20),
+                                        icon_size=64
+                                    ),
+                                    on_click=self.open_manage_event
+                                ),
+                                alignment=ft.alignment.center_right,
+                                padding=ft.padding.only(left=20),
+                            ),
                         ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        spacing=20,
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        expand=True,
                     ),
+
+                    # Add New Event Button (at the bottom)
                     ft.Container(
-                    content=self.add_button,
-                    alignment=ft.alignment.center,
+                        content=self.add_button,
+                        alignment=ft.alignment.center,
                     ),
                 ],
-                alignment=ft.MainAxisAlignment.END,
+                alignment=ft.MainAxisAlignment.START,
                 expand=True,
             )
         )
+
         self.page.update()
 
-    def prev_page(self, e):
-        if self.current_page > 0:
-            self.current_page -= 1
-            self.update_display()
-
-    def next_page(self, e):
-        total_pages = len(self.event_display.event_list) // ITEMS_PER_PAGE + (1 if len(self.event_display.event_list) % ITEMS_PER_PAGE > 0 else 0)
-        if self.current_page < total_pages - 1:
-            self.current_page += 1
-            self.update_display()
+    def open_manage_event(self, e):
+        # Clear the current page content
+        self.page.controls.clear()
+        # Initialize and display the EventManagerApp
+        EventManagerApp(self.page)
+        self.page.update()
 
     def on_form_submit(self, form_data, is_edit, original_event_id=None):
         if form_data:
@@ -260,8 +269,7 @@ class EventManagerApp:
         self.page.update()
 
 def main(page: ft.Page):
-    app = EventManagerApp(page)
-
+    app = LandingApp(page)
 
 if __name__ == "__main__":
     ft.app(target=main)
