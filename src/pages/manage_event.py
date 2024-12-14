@@ -15,27 +15,27 @@ from src.utils.pagesetup import PageSetup
 
 # Import Pages
 from src.pages.manage_budget import BudgetManagerApp
+
 ITEMS_PER_PAGE = 6
 
 class EventManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "PlanPal"
         self.page.theme_mode = ft.ThemeMode.LIGHT
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
 
-        # Now add EventManagerApp components
-        self.controller = ControllerEvent()
+        # Initialize ControllerEvent with EventDatabase
+        self.controller = ControllerEvent(event_db)
         self.event_display = EventDisplay(self.controller.get_event_list())
         self.form_event = FormEvent()
-
-        # Sample event data
-        self.controller.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
-        self.controller.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
-        self.controller.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
-        self.event_display.event_list = self.controller.get_event_list()
 
         self.current_page = 0
         self.create_widgets()
@@ -123,6 +123,8 @@ class EventManagerApp:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
     def update_display(self):
+        # Refresh the event list from the database
+        self.event_display.event_list = self.controller.get_event_list()
         total_pages = len(self.event_display.event_list) // ITEMS_PER_PAGE + (1 if len(self.event_display.event_list) % ITEMS_PER_PAGE > 0 else 0)
 
         # Remove dynamic controls (event cards, etc.) if needed
@@ -138,18 +140,28 @@ class EventManagerApp:
         row = []
         for index, event in enumerate(events_to_display):
             card = EventCard(
-                event_title=event["EventName"],
-                event_date=event["EventDate"],
-                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(self.page, event_id),
-                on_edit_click=lambda e, event_id=event["EventID"]: self.edit_event(event_id),
-                on_delete_click=lambda e, event_id=event["EventID"]: self.delete_event(event_id)
+                event_title=event[1],
+                event_date=event[3],
+                on_view_details_click=lambda e, event_id=event[0]: self.view_event(self.page, event_id),
+                on_edit_click=lambda e, event_id=event[0]: self.edit_event(event_id),
+                on_delete_click=lambda e, event_id=event[0]: self.delete_event(event_id)
             )
             row.append(card)
             if len(row) == 3 or index == len(events_to_display) - 1:
                 rows.append(ft.Row(controls=row, spacing=20, alignment=ft.MainAxisAlignment.CENTER))
                 row = []
 
-        # self.page.add(display_container)
+        display_container = ft.Container(
+            content=ft.Column(
+                controls=rows,
+                spacing=20,
+                alignment=ft.MainAxisAlignment.START,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                expand=True,
+            ),
+            expand=True,
+            alignment=ft.alignment.top_center,
+        )
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -212,7 +224,7 @@ class EventManagerApp:
                     )
                     self.show_success_dialog("Event updated successfully!")
             else:
-                if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
+                if self.controller.get_event_details(form_data["EventID"]):
                     self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
                 else:
                     self.controller.add_event(
@@ -260,7 +272,7 @@ class EventManagerApp:
         self.page.update()
 
 def main(page: ft.Page):
-    app = EventManagerApp(page)
+    app = EventManagerApp(page, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
 
 
 if __name__ == "__main__":

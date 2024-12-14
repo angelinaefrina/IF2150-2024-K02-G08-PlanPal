@@ -19,7 +19,8 @@ class FormEvent:
                     options=[
                         ft.dropdown.Option("Belum dimulai"),
                         ft.dropdown.Option("Sedang berlangsung"),
-                        ft.dropdown.Option("Sudah selesai")
+                        ft.dropdown.Option("Sudah selesai"),
+                        ft.dropdown.Option("Batal")
                     ],
                     value=event_data["EventStatus"] if event_data else ""
                 ),
@@ -43,12 +44,8 @@ class FormEvent:
     def submit_form(self, page, on_submit, is_edit, original_event_id):
         print("Submitting form")
         try:
-            event_id = self.dialog.content.controls[0].value
-            # if not event_id.isdigit():
-            #     raise ValueError("Event ID harus berupa angka.")
-            
             form_data = {
-                "EventID": int(event_id),
+                "EventID": self.dialog.content.controls[0].value,
                 "EventName": self.dialog.content.controls[1].value,
                 "EventLocation": self.dialog.content.controls[2].value,
                 "EventDate": self.dialog.content.controls[3].value,
@@ -61,7 +58,7 @@ class FormEvent:
                 on_submit(form_data, is_edit, original_event_id)
             else:
                 self.display_error_message("Data form tidak valid.")
-        except ValueError as e:
+        except Exception as e:
             self.display_error_message(str(e))
 
     def close_dialog(self, page):
