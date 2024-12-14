@@ -9,6 +9,7 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
+ITEMS_PER_PAGE = 5
 class RundownManagerApp:
     def __init__(self, page, event_id):
         self.page = page
@@ -104,6 +105,11 @@ class RundownManagerApp:
         self.page.add(
             ft.Column(
                 [
+                    ft.Container(
+                        content=self.back_button,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.padding.all(10),
+                    ),
                     ft.Container(
                         content=self.back_button,
                         alignment=ft.alignment.top_left,
