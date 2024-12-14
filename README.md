@@ -42,19 +42,22 @@ python planpal.py
 ### Modul Event
 ![All Events](test/All_Events.png)  
 ![Event Details](test/Event_Details.png)  
-![Add Events](test/Add_Events.png)  
+![Add Events](test/Add_Event.png)  
 ![Add Event Success](test/Add_Event_Success.png)  
 ![Edit Events](test/Edit_Event.png)  
+
 
 ### Modul Anggaran
 ![Anggaran Details](test/Anggaran_Details.jpg)  
 ![Add Anggaran](test/Add_Anggaran.jpg)  
 ![Edit Anggaran](test/Edit_Anggaran.jpg)  
 
+
 ### Modul Vendor
 ![Vendor Details](test/Vendor_Details.jpg)  
 ![Add Vendor](test/Add_Vendor.jpg)  
 ![Edit Vendor](test/Edit_Vendor.jpg)  
+
 
 ### Modul Guest List
 
@@ -63,6 +66,8 @@ python planpal.py
 ![Rundown Details](test/Rundown_Details.png)  
 ![Add Rundown](test/Add_Rundown.png)  
 ![Edit Rundown](test/Edit_Rundown.jpg)  
+
+
 
 ### Pembagian Tugas
 
