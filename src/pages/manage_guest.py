@@ -104,12 +104,12 @@ class GuestManagerApp:
         self.page.add(
             ft.Column(
                 [   
-
                     ft.Container(
                         content=self.back_button,
                         alignment=ft.alignment.top_left,
                         padding=ft.padding.all(10),
                     ),
+
                     ft.Container(
                         content=self.back_button,
                         alignment=ft.alignment.top_left,
@@ -151,11 +151,16 @@ class GuestManagerApp:
         # Load EventManagerApp
         EventManagerApp(self.page)
         self.page.update()
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 43d9cbecfc0f6a4b153c33f013c0a37e0df10ae9
+
+    def back_to_event_manager(self, e):
+        from src.pages.manage_event import EventManagerApp
+        # Clear current page content
+        self.page.controls.clear()
+        # Load EventManagerApp
+        EventManagerApp(self.page)
+        self.page.update()
+        
     def edit_guest(self, event_id, guest_id):
         print(f"Editing budget for EventID: {event_id}")
         guest_list = self.controller.get_guest_list(event_id)
