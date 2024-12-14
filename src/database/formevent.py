@@ -3,14 +3,15 @@ from src.utils.buttons import *
 
 class FormEvent:
     def __init__(self):
+        self.dialog = None
         self.event_details = None
 
     def display_form(self, page, on_submit, event_data=None, is_edit=False, original_event_id=None):
         print("Displaying form with event data:", event_data)
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Event" if is_edit else "Add Event"),
-            content=ft.Column([
-                ft.TextField(label="Event ID", value=event_data["EventID"] if event_data else "", on_change=self.validate_integer),
+            content=ft.Column(
+                controls=[
                 ft.TextField(label="Event Name", value=event_data["EventName"] if event_data else ""),
                 ft.TextField(label="Event Location", value=event_data["EventLocation"] if event_data else ""),
                 ft.TextField(label="Event Date (YYYY-MM-DD)", value=event_data["EventDate"] if event_data else ""),
@@ -45,11 +46,11 @@ class FormEvent:
         print("Submitting form")
         try:
             form_data = {
-                "EventID": self.dialog.content.controls[0].value,
-                "EventName": self.dialog.content.controls[1].value,
-                "EventLocation": self.dialog.content.controls[2].value,
-                "EventDate": self.dialog.content.controls[3].value,
-                "EventStatus": self.dialog.content.controls[4].value
+                #"EventID": self.dialog.content.controls[0].value,
+                "EventName": self.dialog.content.controls[0].value,
+                "EventLocation": self.dialog.content.controls[1].value,
+                "EventDate": self.dialog.content.controls[2].value,
+                "EventStatus": self.dialog.content.controls[3].value
             }
             if self.validate_form_data(form_data):
                 self.event_details = form_data
@@ -70,7 +71,7 @@ class FormEvent:
         self.dialog.update()
 
     def validate_form_data(self, form_data):
-        required_fields = ["EventID", "EventName", "EventLocation", "EventDate", "EventStatus"]
+        required_fields = ["EventName", "EventLocation", "EventDate", "EventStatus"]
         for field in required_fields:
             if field not in form_data or not form_data[field]:
                 self.display_error_message(f"Field '{field}' tidak boleh kosong.")

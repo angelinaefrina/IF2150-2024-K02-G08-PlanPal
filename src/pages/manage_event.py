@@ -210,13 +210,9 @@ class EventManagerApp:
     def on_form_submit(self, form_data, is_edit, original_event_id=None):
         if form_data:
             if is_edit:
-                # Check if the new EventID already exists
-                if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
-                    self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
-                else:
                     self.controller.delete_event(original_event_id)
                     self.controller.add_event(
-                        form_data["EventID"],
+                        original_event_id,
                         form_data["EventName"],
                         form_data["EventLocation"],
                         form_data["EventDate"],
@@ -224,11 +220,9 @@ class EventManagerApp:
                     )
                     self.show_success_dialog("Event updated successfully!")
             else:
-                if self.controller.get_event_details(form_data["EventID"]):
-                    self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
-                else:
+                    new_event_id = self.event_db.get_max_event_id() + 1
                     self.controller.add_event(
-                        form_data["EventID"],
+                        new_event_id,
                         form_data["EventName"],
                         form_data["EventLocation"],
                         form_data["EventDate"],

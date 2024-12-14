@@ -14,9 +14,13 @@ class PlanPal:
         self.event_db.create_event_table()
 
         self.guest_list_db = GuestListDatabase("planpal.db")
+        self.guest_list_db.create_guest_list_table()
         self.budget_db = BudgetDatabase("planpal.db")
+        self.budget_db.create_budget_table()
         self.vendor_db = VendorDatabase("planpal.db")
+        self.vendor_db.create_vendor_table()
         self.rundown_db = RundownDatabase("planpal.db")
+        self.rundown_db.create_rundown_table()
 
         # Add sample data
         # self.add_sample_data()
