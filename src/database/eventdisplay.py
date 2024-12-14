@@ -7,9 +7,9 @@ class EventDisplay:
             self.display_error("Tidak ada event yang tersedia.")
             return
         print("Daftar Event:")
-        for event in self.event_list:
-            print(f"- EventID: {event['EventID']}, Location: {event['EventLocation']}, "
-                  f"Date: {event['EventDate']}, Status: {event['EventStatus']}")
+        events = self.controller_event.get_all_events()
+        for event in events:
+            print(f"Event ID: {event.event_id}, Lokasi: {event.event_location}, Tanggal: {event.event_date}, Status: {event.event_status}")
 
     def display_error(self, error_message):
         print(f"Error: {error_message}")

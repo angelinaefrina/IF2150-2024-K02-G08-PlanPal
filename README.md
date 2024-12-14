@@ -9,13 +9,54 @@ Sebuah aplikasi event planner untuk memudahkan mengelola acara
 
 ## Deskripsi Singkat
 
+Aplikasi ini dirancang untuk membantu mengelola acara secara teratur. Aplikasi ini berjalan secara lokal dan tidak membutuhkan koneksi internet. Fitur utama aplikasi mencakup melihat, mengelola, dan menghapus acara. Pengguna dapat melihat seluruh acara yang sudah dibuat dan melihat detil suatu acara yang mencakup nama acara, lokasi, tanggal, dan status acara. Pengguna juga dapat mengelola masing-masing acara dan dapat mengubah nama, lokasi, tanggal, status, anggaran, rundown, vendor, dan daftar tamu acara.
+
 ## Cara Menjalankan Aplikasi
+
+### Prequisite
+Pastikan anda memiliki python
+
+```
+https://www.python.org/downloads/
+```
+
+### Menjalankan Aplikasi
+Install dependencies terlebih dahulu
+```
+pip install -r requirements.txt
+```
+
+Buka terminal dan ganti direktori ke:
+
+```
+...\IF2150-2024-K02-G08-PlanPal\src>
+```
+
+Jalankan program menggunakan python
+```
+python planpal.py
+```
 
 ## Daftar Modul
 
 ### Modul X
 ### Modul X
 ### Pembagian Tugas
+
+| No | Fitur   | NIM |
+|----|---------|-----|
+| 1  | Mengelola Suatu Acara | 13523070 |
+| 2  | Melihat Daftar Acara  | 13523070, 13523060 |
+| 3  | Filter Daftar     | 13523078 |
+| 4  | Mengelola Anggaran    | 13523050 |
+| 5  | Mengelola Vendor | 13523010, 13523050 |
+| 6  | Mengelola  Daftar Tamu  | 13523078 |
+| 7  | Mengelola Rundown | 13523060 |
+| 8  | UI/UX | 13523050, 13523060 |
+| 9  | Database | 13523010 |
+| 10 | Integrasi | 13523060, 13523070 |
+
+
 
 ## Daftar Tabel Basisdata
 
