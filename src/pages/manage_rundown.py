@@ -7,6 +7,7 @@ from src.database.rundownpage import RundownPage
 from src.database.rundowncontroller import RundownController
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
+from datetime import datetime
 
 ITEMS_PER_PAGE = 5
 class RundownManagerApp:
@@ -18,9 +19,8 @@ class RundownManagerApp:
         # Setup page
         self.setup_page()
 
-        # Initialize Controller and Page
-        self.rundown_controller = RundownController(rundown_db)
-        self.rundown_page = RundownPage()
+        self.controller = RundownController(rundown_db)
+        self.rundown_form = RundownPage()
         self.event_db = event_db
         self.guest_list_db = guest_list_db
         self.budget_db = budget_db
@@ -96,7 +96,7 @@ class RundownManagerApp:
                 )
             ),
             color= '#4539B4',
-            on_click= self.add_rundown(self, self.event_id)
+            on_click=lambda e: self.add_rundown(e, self.event_id)
         )
         
         self.back_button = BackButton(
@@ -109,11 +109,6 @@ class RundownManagerApp:
         self.page.add(
             ft.Column(
                 [
-                    ft.Container(
-                        content=self.back_button,
-                        alignment=ft.alignment.top_left,
-                        padding=ft.padding.all(10),
-                    ),
                     ft.Container(
                         content=self.back_button,
                         alignment=ft.alignment.top_left,
@@ -146,18 +141,18 @@ class RundownManagerApp:
         )
 
     def add_rundown(self, e, event_id):
-        self.rundown_page.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
+        self.rundown_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
         
     def back_to_event_manager(self, e):
         from pages.manage_event import EventManagerApp
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def edit_rundown(self, event_id, agenda_name):
-        rundowns = self.rundown_controller.get_rundown_list(event_id)
+        rundowns = self.controller.get_rundown_list(event_id)
 
         print(f"Editing rundown {agenda_name} for event {event_id}")
         rundown_data = next(
@@ -165,7 +160,7 @@ class RundownManagerApp:
         )
 
         if rundown_data:
-            self.rundown_page.display_form(
+            self.rundown_form.display_form(
                 page= self.page,
                 on_submit= self.on_form_submit,
                 event_id= event_id,
@@ -175,13 +170,35 @@ class RundownManagerApp:
         else:
             self.show_error_dialog("Rundown not found.")
 
-    def delete_rundown(self, event_id, agenda_name):
-        if self.rundown_controller.get_rundown_list(event_id):
-            self.rundown_controller.delete_rundown(event_id, agenda_name)
-            self.update_display()
+    def delete_rundown(self, event_id, agenda_name, dialog=None):
+        """Menghapus rundown setelah konfirmasi."""
+        if dialog:
+            dialog.open = False  # Tutup dialog konfirmasi
+        self.controller.delete_rundown(event_id, agenda_name)
+        self.update_display()
+        self.page.update()
+
+    def confirm_delete_rundown(self, event_id, agenda_name):
+        """Menampilkan dialog konfirmasi sebelum menghapus rundown."""
+        confirmation_dialog = ft.AlertDialog(
+            title=ft.Text("Konfirmasi Penghapusan"),
+            content=ft.Text(f"Apakah Anda yakin ingin menghapus rundown '{agenda_name}' untuk Event ID {event_id}?"),
+            actions=[
+                ft.TextButton("Hapus", on_click=lambda e: self.delete_rundown(event_id, agenda_name, confirmation_dialog)),
+                ft.TextButton("Batal", on_click=lambda e: self.close_dialog(confirmation_dialog)),
+            ],
+        )
+        self.page.dialog = confirmation_dialog
+        confirmation_dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, dialog):
+        """Tutup dialog."""
+        dialog.open = False
+        self.page.update()
 
     def update_display(self):
-        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -189,7 +206,7 @@ class RundownManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = self.current_page + ITEMS_PER_PAGE
 
-        rundowns = self.rundown_controller.get_all_rundown_list()
+        rundowns = self.controller.get_all_rundown_list()
         self.tree.rows.clear()
         for rundown in rundowns[start_index:end_index]:
             self.tree.rows.append(
@@ -206,7 +223,7 @@ class RundownManagerApp:
                                 controls=
                                 [
                                     EditButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.edit_rundown(event_id, agenda_name)),
-                                    DeleteButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.delete_rundown(event_id, agenda_name)),
+                                    DeleteButton(on_click_action= lambda e, event_id=rundown["EventID"], agenda_name=rundown["AgendaName"]: self.confirm_delete_rundown(event_id, agenda_name)),
                                 ]
                             )
                         ),
@@ -221,27 +238,35 @@ class RundownManagerApp:
             self.update_display()
 
     def next_page(self, e):
-        total_pages = (len(self.rundown_controller.get_all_rundown_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_rundown = self.controller.get_rundown_list(1)
+        total_pages = (len(total_rundown) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
         if self.current_page < total_pages - 1:
             self.current_page += 1
             self.update_display()
 
     def on_form_submit(self, form_data, is_edit, event_id):
         # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
+        try:
+            agenda_time_start = datetime.strptime(form_data["AgendaTimeStart"], "%H:%M")
+            agenda_time_end = datetime.strptime(form_data["AgendaTimeEnd"], "%H:%M")
+        except ValueError as e:
+            self.show_error_dialog(f"Invalid time format: {e}")
+            return
+        
         if is_edit:
-            self.rundown_controller.edit_rundown(
+            self.controller.edit_rundown(
                 event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
-                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
+                agenda_time_start.strftime("%H:%M"),
+                agenda_time_end.strftime("%H:%M"),
                 form_data["AgendaPIC"]
             )
         else:
-            self.rundown_controller.add_rundown(
+            self.controller.add_rundown(
                 event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
-                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
+                agenda_time_start.strftime("%H:%M"),
+                agenda_time_end.strftime("%H:%M"),
                 form_data["AgendaPIC"]
             )
         self.update_display()
@@ -276,6 +301,6 @@ class RundownManagerApp:
 
 
 # def main(page: ft.Page):
-#     app = RundownManagerApp(page)
+#     app = RundownManagerApp(page, event_id)
 
 # ft.app(target=main)

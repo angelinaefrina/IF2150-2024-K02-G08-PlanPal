@@ -5,11 +5,12 @@ class GuestListForm:
     def __init__(self):
         self.guest_details = None
 
-    def display_form(self, page, on_submit, event_id, guest_list_data=None, is_edit=False):
+    def display_form(self, page, on_submit, event_id, guest_id, guest_list_data=None, is_edit=False):
         print("Displaying form with guest list data:", guest_list_data)
 
         # Set default values if guest_list_data is None
         event_id = event_id
+        guest_id = guest_id
         guest_name = guest_list_data["GuestName"] if guest_list_data else ""
         rsvp_status = guest_list_data["RSVPStatus"] if guest_list_data else ""
 
@@ -23,14 +24,15 @@ class GuestListForm:
                             options=[
                             ft.dropdown.Option("Hadir"), 
                             ft.dropdown.Option("Tidak Hadir"), 
-                            ft.dropdown.Option("Menyusul")
+                            ft.dropdown.Option("Menyusul"),
+                            ft.dropdown.Option("Meninggalkan")
                             ], 
                             value=rsvp_status, color="#4539B4"),
                 ],
                 height=300,
             ),
             actions=[
-                SaveButton(on_click_action=lambda e: self.submit_form(page, event_id, on_submit, is_edit)),
+                SaveButton(on_click_action=lambda e: self.submit_form(page, event_id, guest_id, on_submit, is_edit)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page)),
             ]
         )
@@ -38,12 +40,13 @@ class GuestListForm:
         self.dialog.open = True
         page.update()
 
-    def submit_form(self, page, event_id, on_submit, is_edit):
+    def submit_form(self, page, event_id, guest_id, on_submit, is_edit):
         """Handle form submission by validating and passing data to the controller."""
         print("Submitting form...")
         try:
             # Collecting values from the form
             event_id = event_id
+            guest_id = guest_id
             # if isinstance(event_id, int):
             #     pass
             # elif event_id.isdigit():
@@ -68,10 +71,10 @@ class GuestListForm:
                 # If editing, we update the existing entry; if adding, we add a new entry
                 if is_edit:
                     print(f"Editing guest for EventID: {event_id}")
-                    on_submit(form_data, is_edit, event_id)  # Update existing entry
+                    on_submit(form_data, is_edit, event_id, guest_id)  # Update existing entry
                 else:
                     print("Adding new guest")
-                    on_submit(form_data, is_edit, event_id)  # Add new entry
+                    on_submit(form_data, is_edit, event_id, guest_id)  # Add new entry
             else:
                 self.display_error_message("Form data is invalid.")
         except ValueError as e:

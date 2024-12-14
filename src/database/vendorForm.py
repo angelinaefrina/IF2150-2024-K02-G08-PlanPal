@@ -10,9 +10,9 @@ class VendorForm:
 
         # Set default values if vendor_data is None
         event_id = event_id
-        vendor_name = vendor_data["VendorName"] if vendor_data else ""
-        vendor_contact = vendor_data["VendorContact"] if vendor_data else ""
-        vendor_product = vendor_data["VendorProduct"] if vendor_data else ""
+        vendor_name = vendor_data[1] if vendor_data else ""
+        vendor_contact = vendor_data[2] if vendor_data else ""
+        vendor_product = vendor_data[3] if vendor_data else ""
 
         # Create the dialog
         self.dialog = ft.AlertDialog(
