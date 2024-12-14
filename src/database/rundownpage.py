@@ -3,10 +3,9 @@ from src.utils.buttons import *
 
 class RundownPage:
     def __init__(self):
-        self
         self.rundown_details = None
 
-    def display_form(self, page, on_submit, rundown_data=None, is_edit=False, original_event_id=None):
+    def display_form(self, page, on_submit, event_id, rundown_data=None, is_edit=False, original_event_id=None):
         print("Displaying rundown form with rundown data...", rundown_data)
 
         # Set default

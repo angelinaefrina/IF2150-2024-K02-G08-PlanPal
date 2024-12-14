@@ -1,5 +1,7 @@
+from .database import RundownDatabase
+
 class RundownController:
-    def __init__(self):
+    def __init__(self, rundown_db):
         self.rundown_list = []
 
     def add_rundown(self, event_id, agenda_name, agenda_time_start, agenda_time_end, agenda_pic):
