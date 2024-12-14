@@ -24,7 +24,7 @@ class EventDatabase(Database):
     def create_event_table(self):
         query = """
         CREATE TABLE IF NOT EXISTS Event (
-            EventID INTEGER PRIMARY KEY AUTOINCREMENT,
+            EventID INTEGER PRIMARY KEY,
             EventName TEXT NO NULL,
             EventLocation TEXT NOT NULL,
             EventDate DATE NOT NULL,
@@ -46,6 +46,13 @@ class EventDatabase(Database):
         SELECT * FROM Event
         """
         return self.fetch_query(query)
+    
+    def get_max_event_id(self):
+        query = """
+        SELECT MAX(EventID) FROM Event
+        """
+        result = self.fetch_query(query)
+        return result[0][0] if result[0][0] is not None else 0
 
 # ------------------------------ Tabel GuestList ------------------------------
 class GuestListDatabase(Database):

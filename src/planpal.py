@@ -14,9 +14,13 @@ class PlanPal:
         self.event_db.create_event_table()
 
         self.guest_list_db = GuestListDatabase("planpal.db")
+        self.guest_list_db.create_guest_list_table()
         self.budget_db = BudgetDatabase("planpal.db")
+        self.budget_db.create_budget_table()
         self.vendor_db = VendorDatabase("planpal.db")
+        self.vendor_db.create_vendor_table()
         self.rundown_db = RundownDatabase("planpal.db")
+        self.rundown_db.create_rundown_table()
 
         # Add sample data
         # self.add_sample_data()
@@ -50,8 +54,8 @@ class PlanPal:
         if not self.event_db.get_all_events():
             # Add sample events
             self.event_db.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
-            self.event_db.add_event(2, "Event B", "Location B", "2023-10-02", "Berlangsung")
-            self.event_db.add_event(3, "Event C", "Location C", "2023-10-03", "Selesai")
+            self.event_db.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
+            self.event_db.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
 
     def open_manage_event(self, e):
         # Clear the current page content

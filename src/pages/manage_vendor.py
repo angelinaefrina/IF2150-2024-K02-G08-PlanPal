@@ -7,18 +7,25 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.database.vendorForm import VendorForm
 
+
 ITEMS_PER_PAGE = 5
 
 class VendorManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Vendor Management"
+        self.event_id = event_id
 
         # Setup page
         self.setup_page()
 
         self.controller = ControllerVendor()
         self.vendor_form = VendorForm()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         self.controller.add_vendor(1, "Vendor A", "0852", "baju")
         self.controller.add_vendor(2, "Vendor B", "idline", "lanyard")
@@ -89,7 +96,7 @@ class VendorManagerApp:
                 )
             ),
             color="#4539B4", 
-            on_click=self.add_vendor
+            on_click=lambda e: self.add_vendor(e, self.event_id)
         )
 
         self.back_button = BackButton(
@@ -133,16 +140,16 @@ class VendorManagerApp:
             )
         )
 
-    def add_vendor(self, e):
+    def add_vendor(self, e, event_id):
         print("Add Vendor button clicked.")
-        self.vendor_form.display_form(self.page, self.on_form_submit, is_edit=False)
+        self.vendor_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def edit_vendor(self, event_id, vendor_name):
@@ -159,9 +166,9 @@ class VendorManagerApp:
             self.vendor_form.display_form(
                 page=self.page,
                 on_submit=self.on_form_submit,
+                event_id=event_id,
                 vendor_data=vendor_data,
                 is_edit=True,
-                original_event_id=event_id,
             )
             print(f"edit_vendor called with event_id={event_id}, vendor_name={vendor_name}")
         else:
@@ -175,7 +182,7 @@ class VendorManagerApp:
             self.show_error_dialog(f"Vendor not found for Event ID '{event_id}' and Vendor Name '{vendor_name}'.")
 
     def update_display(self):
-        total_pages = (len(self.controller.get_vendor_by_event_id(1)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_vendor_by_event_id(self.event_id)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -183,7 +190,7 @@ class VendorManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = start_index + ITEMS_PER_PAGE
 
-        total_vendors = self.controller.get_vendor_by_event_id(1)
+        total_vendors = self.controller.get_vendor_by_event_id(self.event_id)
         self.tree.rows.clear()  
         for vendor in total_vendors[start_index:end_index]:
             self.tree.rows.append(
@@ -222,17 +229,17 @@ class VendorManagerApp:
             self.current_page += 1
             self.update_display()
 
-    def on_form_submit(self, form_data, is_edit, original_event_id):
+    def on_form_submit(self, form_data, is_edit, event_id):
         if is_edit:
             self.controller.edit_vendor(
-                original_event_id, 
+                event_id, 
                 form_data["VendorName"], 
                 form_data["VendorContact"], 
                 form_data["VendorProduct"]
                 )
         else:
             self.controller.add_vendor(
-                form_data["EventID"], 
+                event_id, 
                 form_data["VendorName"], 
                 form_data["VendorContact"], 
                 form_data["VendorProduct"]
@@ -268,8 +275,8 @@ class VendorManagerApp:
         self.page.update()
 
 
-def main(page: ft.Page):
-    app = VendorManagerApp(page)
+# def main(page: ft.Page):
+#     app = VendorManagerApp(page, 1)
 
-if __name__ == "__main__":
-    ft.app(target=main)
+# if __name__ == "__main__":
+#     ft.app(target=main)
