@@ -5,11 +5,11 @@ class BudgetForm:
     def __init__(self):
         self.budget_details = None
 
-    def display_form(self, page, on_submit, budget_data=None, is_edit=False, original_event_id=None):
+    def display_form(self, page, on_submit, event_id, budget_data=None, is_edit=False):
         print("Displaying form with budget data:", budget_data)
         
         # Set default values if budget_data is None
-        event_id = str(budget_data["EventID"]) if budget_data else ""
+        event_id = event_id
         requirement_name = budget_data["RequirementName"] if budget_data else ""
         requirement_budget = str(budget_data["RequirementBudget"]) if budget_data else ""
         requirement_quantity = str(budget_data["RequirementQuantity"]) if budget_data else ""
@@ -18,7 +18,7 @@ class BudgetForm:
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Budget" if is_edit else "Add Budget"),
             content=ft.Column([
-                ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
+                # ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
                 ft.TextField(label="Requirement Name", value=requirement_name, color="#4539B4"),
                 ft.TextField(label="Budget per Unit", value=requirement_budget, color="#4539B4"),
                 ft.TextField(label="Quantity", value=requirement_quantity, color="#4539B4"),
@@ -26,7 +26,7 @@ class BudgetForm:
                 height=300,
             ),
             actions=[
-                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                SaveButton(on_click_action=lambda e: self.submit_form(page, event_id, on_submit, is_edit)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page)),
             ]
         )
@@ -41,21 +41,21 @@ class BudgetForm:
             e.control.error_text = None
         e.control.update()
 
-    def submit_form(self, page, on_submit, is_edit, original_event_id):
+    def submit_form(self, page, event_id, on_submit, is_edit):
         """Handle form submission by validating and passing data to the controller."""
         print("Submitting form...")
         try:
             # Collecting values from the form
-            event_id = self.dialog.content.controls[0].value
-            if isinstance(event_id, int):
-                pass
-            elif event_id.isdigit():
-                event_id = int(event_id)  # Convert it to an integer if it's a string
-            else:
-                raise ValueError("Event ID must be a valid number.")
+            event_id = event_id
+            # if isinstance(event_id, int):
+            #     pass
+            # elif event_id.isdigit():
+            #     event_id = int(event_id)  # Convert it to an integer if it's a string
+            # else:
+            #     raise ValueError("Event ID must be a valid number.")
 
             form_data = {
-                "EventID": int(event_id),
+                # "EventID": int(event_id),
                 "RequirementName": self.dialog.content.controls[1].value,
                 "RequirementBudget": float(self.dialog.content.controls[2].value),
                 "RequirementQuantity": int(self.dialog.content.controls[3].value),
@@ -71,11 +71,11 @@ class BudgetForm:
 
                 # If editing, we update the existing entry; if adding, we add a new entry
                 if is_edit:
-                    print(f"Editing budget for EventID: {original_event_id}")
-                    on_submit(form_data, is_edit, original_event_id)  # Update existing entry
+                    print(f"Editing budget for EventID: {event_id}")
+                    on_submit(form_data, is_edit, event_id)  # Update existing entry
                 else:
                     print("Adding new budget")
-                    on_submit(form_data, is_edit, original_event_id=None)  # Add new entry
+                    on_submit(form_data, is_edit, event_id)  # Add new entry
             else:
                 self.display_error_message("Form data is invalid.")
         except ValueError as e:

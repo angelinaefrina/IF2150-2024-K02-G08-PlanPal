@@ -36,6 +36,28 @@ class RundownController:
                 print(f"Updated budget: {rundown}")
                 break
 
+    def display_rundown(self, event_id):
+        print(f"=== Rundown untuk EventID {event_id} ===")
+        event_rundowns = [rundown for rundown in self.rundown_list if rundown["EventID"] == event_id]
+        print(f"event_rundowns: {event_rundowns}")
+        if not event_rundowns:
+            print("No rundowns available to display.")
+            return
+        print("Rundown:")
+        self.arrange_rundown()
+        for rundown in event_rundowns:
+            print(
+                f"- Agenda: {rundown['AgendaName']}, "
+                f"Start: {rundown['AgendaTimeStart']}, "
+                f"End: {rundown['AgendaTimeEnd']}, "
+                f"Duration: {rundown['AgendaDuration']} minutes, "
+                f"PIC: {rundown['AgendaPIC']}"
+            )
+        print("=============================")
+    
+    def arrange_rundown(self):
+        self.rundown_list.sort(key=lambda x: x["AgendaTimeStart"])
+            
     # def validate_rundown(self, agenda_time_start, agenda_time_end):
     #     if agenda_time_start >= agenda_time_end:
     #         print("Waktu mulai harus lebih kecil dari waktu selesai.")
