@@ -57,6 +57,14 @@ class PlanPal:
             self.event_db.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
             self.event_db.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
 
+    def add_sample_data_budget(self):
+        # Check if there are any events in the database
+        if not self.budget_db.get_budget_by_event(0):
+            # Add sample events
+            self.budget_db.add_budget(0, "Benda A", 1000, 10)
+            self.budget_db.add_budget(0, "Benda B", 2000, 10)
+            
+
     def open_manage_event(self, e):
         # Clear the current page content
         self.page.controls.clear()

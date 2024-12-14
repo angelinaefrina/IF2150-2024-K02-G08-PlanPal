@@ -20,7 +20,7 @@ class BudgetManagerApp:
         # Setup page
         self.setup_page()
 
-        self.controller = ControllerBudget()
+        self.controller = ControllerBudget(budget_db)
         self.budget_form = BudgetForm()
         self.event_db = event_db
         self.guest_list_db = guest_list_db
@@ -28,8 +28,8 @@ class BudgetManagerApp:
         self.vendor_db = vendor_db
         self.rundown_db = rundown_db
 
-        self.controller.add_budget(1, "Benda A", 1000, 10)
-        self.controller.add_budget(2, "Benda B", 2000, 5)
+        # self.controller.add_budget(1, "Benda A", 1000, 10)
+        # self.controller.add_budget(2, "Benda B", 2000, 5)
 
         self.current_page = 0
         self.create_widgets()
@@ -162,7 +162,7 @@ class BudgetManagerApp:
 
         print(f"Budgets retrieved for EventID {event_id}: {budgets}")
         budget_data = next(
-            (budget for budget in budgets if budget["RequirementName"] == requirement_name), None
+            (budget for budget in budgets if budget[1] == requirement_name), None
         )
 
         if budget_data:
@@ -185,7 +185,7 @@ class BudgetManagerApp:
             self.show_error_dialog(f"Budget not found for Event ID '{event_id}' and Requirement Name '{requirement_name}'.")
 
     def update_display(self):
-        total_pages = (len(self.controller.get_all_budget_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_budget_list(self.event_id)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -193,18 +193,18 @@ class BudgetManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = self.current_page + ITEMS_PER_PAGE
 
-        total_budgets = self.controller.get_all_budget_list()
+        total_budgets = self.controller.get_budget_list(self.event_id)
         self.tree.rows.clear()  
         for budget in total_budgets[start_index:end_index]:
-            total_cost = budget["RequirementBudget"] * budget["RequirementQuantity"]
+            total_cost = int(budget[2]) * int(budget[3])
             self.tree.rows.append(
                 ft.DataRow(
                     cells=
                         [
+                        ft.DataCell(ft.Text(budget[0])),
                         ft.DataCell(ft.Text(budget[1])),
                         ft.DataCell(ft.Text(budget[2])),
                         ft.DataCell(ft.Text(budget[3])),
-                        ft.DataCell(ft.Text(budget[4])),
                         ft.DataCell(ft.Text(total_cost)),
                         ft.DataCell(
                             ft.Row(
