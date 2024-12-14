@@ -71,5 +71,3 @@ class GuestController:
         else:
             print(f"No guests found for EventID {event_id}.")
             return None
-
-

@@ -7,10 +7,11 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.database.vendorForm import VendorForm
 
+
 ITEMS_PER_PAGE = 5
 
 class VendorManagerApp:
-    def __init__(self, page, event_id):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Vendor Management"
         self.event_id = event_id
@@ -18,11 +19,18 @@ class VendorManagerApp:
         # Setup page
         self.setup_page()
 
-        self.controller = ControllerVendor()
+        self.controller = ControllerVendor(vendor_db)
         self.vendor_form = VendorForm()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
-        self.controller.add_vendor(1, "Vendor A", "0852", "baju")
-        self.controller.add_vendor(2, "Vendor B", "idline", "lanyard")
+
+        # Sample
+        # self.controller.add_vendor(1, "Vendor A", "0852", "baju")
+        # self.controller.add_vendor(2, "Vendor B", "idline", "lanyard")
 
         self.current_page = 0
         self.create_widgets()
@@ -35,9 +43,9 @@ class VendorManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "./src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "./src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "./src/assets/fonts/Afacad/Afacad-Regular.ttf",
         }
         # Header PlanPal
         self.page.add(
@@ -143,7 +151,7 @@ class VendorManagerApp:
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def edit_vendor(self, event_id, vendor_name):
@@ -152,7 +160,7 @@ class VendorManagerApp:
 
         print(f"Vendors retrieved for EventID {event_id}: {vendors}")
         vendor_data = next(
-            (vendor for vendor in vendors if vendor["VendorName"] == vendor_name), None
+            (vendor for vendor in vendors if vendor[1] == vendor_name), None
         )
 
         if vendor_data:
@@ -176,7 +184,7 @@ class VendorManagerApp:
             self.show_error_dialog(f"Vendor not found for Event ID '{event_id}' and Vendor Name '{vendor_name}'.")
 
     def update_display(self):
-        total_pages = (len(self.controller.get_vendor_by_event_id(1)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_vendor_by_event_id(self.event_id)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -184,23 +192,23 @@ class VendorManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = start_index + ITEMS_PER_PAGE
 
-        total_vendors = self.controller.get_vendor_by_event_id(1)
+        total_vendors = self.controller.get_vendor_by_event_id(self.event_id)
         self.tree.rows.clear()  
         for vendor in total_vendors[start_index:end_index]:
             self.tree.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(vendor["VendorName"])),
-                        ft.DataCell(ft.Text(vendor["VendorContact"])),
-                        ft.DataCell(ft.Text(vendor["VendorProduct"])),
+                        ft.DataCell(ft.Text(vendor[1])),
+                        ft.DataCell(ft.Text(vendor[2])),
+                        ft.DataCell(ft.Text(vendor[3])),
                         ft.DataCell(
                             ft.Row(
                                 controls=[
                                     EditButton(
-                                        on_click_action=lambda e, event_id=vendor["EventID"], vendor_name=vendor["VendorName"]: self.edit_vendor(event_id, vendor_name)
+                                        on_click_action=lambda e, event_id=vendor[0], vendor_name=vendor[1]: self.edit_vendor(event_id, vendor_name)
                                     ),
                                     DeleteButton(
-                                        on_click_action=lambda e, event_id=vendor["EventID"], vendor_name=vendor["VendorName"]: self.delete_vendor(event_id, vendor_name)
+                                        on_click_action=lambda e, event_id=vendor[0], vendor_name=vendor[1]: self.delete_vendor(event_id, vendor_name)
                                     ),
                                 ]
                             )
@@ -269,8 +277,8 @@ class VendorManagerApp:
         self.page.update()
 
 
-def main(page: ft.Page):
-    app = VendorManagerApp(page, 1)
+# def main(page: ft.Page):
+#     app = VendorManagerApp(page, 1)
 
-if __name__ == "__main__":
-    ft.app(target=main)
+# if __name__ == "__main__":
+#     ft.app(target=main)

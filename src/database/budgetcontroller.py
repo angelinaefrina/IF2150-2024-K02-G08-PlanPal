@@ -1,37 +1,61 @@
 class ControllerBudget:
-    def __init__(self):
-        self.budget_database = []
+    def __init__(self, budget_db):
+        self.budget_db = budget_db
 
     def add_budget(self, event_id, requirement_name, requirement_budget, requirement_quantity):
-        if self.validate_budget(requirement_budget, requirement_quantity):
-            new_budget = {
-                "EventID": event_id,
-                "RequirementName": requirement_name,
-                "RequirementBudget": requirement_budget,
-                "RequirementQuantity": requirement_quantity
-            }
-            self.budget_database.append(new_budget)
-            print(f"Anggaran untuk event {event_id} berhasil ditambahkan.")
+        budget_data = {
+            "EventID": event_id,
+            "RequirementName": requirement_name,
+            "RequirementBudget": requirement_budget,
+            "RequirementQuantity": requirement_quantity
+        }
+        if self.validate_budget_data(budget_data):
+            self.budget_db.add_budget(event_id, requirement_name, requirement_budget, requirement_quantity)            
+            print(f"budget '{requirement_name}' berhasil ditambahkan untuk EventID {event_id}.")
         else:
-            print("Data anggaran tidak valid. Penambahan dibatalkan.")
+            print("Gagal menambahkan budget. Data tidak valid.")
+    
+    def validate_budget_data(self, budget_data):
+        required_fields = ["EventID", "RequirementName", "RequirementBudget", "RequirementQuantity"]
+        for field in required_fields:
+            if field not in budget_data or not budget_data[field]:
+                print(f"Validasi gagal: '{field}' harus diisi.")
+                return False
 
+        return True
+
+    # def edit_budget(self, original_event_id, requirement_name, requirement_budget, requirement_quantity):
+    #     # Find the budget entry to update
+    #     for budget in self.budget_database:
+    #         if budget["EventID"] == original_event_id:
+    #             budget["RequirementName"] = requirement_name
+    #             budget["RequirementBudget"] = requirement_budget
+    #             budget["RequirementQuantity"] = requirement_quantity
+    #             print(f"Updated budget: {budget}")
+    #             break
+        
     def edit_budget(self, original_event_id, requirement_name, requirement_budget, requirement_quantity):
-        # Find the budget entry to update
-        for budget in self.budget_database:
-            if budget["EventID"] == original_event_id:
-                budget["RequirementName"] = requirement_name
-                budget["RequirementBudget"] = requirement_budget
-                budget["RequirementQuantity"] = requirement_quantity
-                print(f"Updated budget: {budget}")
-                break
+        budget_data = {
+            "EventID": original_event_id,
+            "RequirementName": requirement_name,
+            "RequirementBudget": requirement_budget,
+            "RequirementQuantity": requirement_quantity
+        }
+        if self.validate_budget_data(budget_data):
+            # self.vendor_db.update_vendor(vendor_data)
+            self.budget_db.delete_budget(original_event_id, requirement_name)
+            self.budget_db.add_budget(original_event_id, requirement_name, requirement_budget, requirement_quantity)
+            print(f"Vendor '{requirement_name}' berhasil diperbarui untuk EventID {original_event_id}.")
+        else:
+            print("Gagal memperbarui vendor. Data tidak valid.")
+
+
     
     def delete_budget(self, event_id, requirement_name):
-        for budget in self.budget_database:
-            if budget["EventID"] == event_id and budget["RequirementName"] == requirement_name:
-                self.budget_database.remove(budget)
-                print(f"Anggaran untuk {requirement_name} pada event {event_id} berhasil dihapus.")
-                return
-        print(f"Anggaran untuk {requirement_name} pada event {event_id} tidak ditemukan.")
+        if self.budget_db.delete_budget(event_id, requirement_name):
+            print(f"Budget '{requirement_name}' berhasil dihapus dari EventID {event_id}.")
+        else:
+            print(f"Budget '{requirement_name}' tidak ditemukan untuk EventID {event_id}.")
 
     def validate_budget(self, requirement_budget, requirement_quantity):
         if requirement_budget < 0:
@@ -58,16 +82,18 @@ class ControllerBudget:
                 f"Total Cost: {total_cost}"
             )
         
-    def get_all_budget_list(self):
-        return self.budget_database
+    # def get_all_budget_list(self):
+    #     budgets = self.budget_db.select_all_budgets()
 
+    #     if not budgets:
+    #         print(f"Tidak ada budget yang ditemukan.")
+    #     return budgets
+    
     def get_budget_list(self, event_id):
-        budgets = [budget for budget in self.budget_database if budget["EventID"] == event_id]
-        if budgets:
-            return budgets
-        else:
-            print(f"No budgets found for EventID {event_id}.")
-            return []
+        budgets = self.budget_db.get_budget_list(event_id)
+        if not budgets:
+            print(f"Tidak ada vendor yang ditemukan untuk EventID {event_id}.")
+        return budgets
         
 '''
     def edit_budget(self, event_id, requirement_name, new_budget=None, new_quantity=None):

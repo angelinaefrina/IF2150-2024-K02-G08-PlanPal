@@ -129,7 +129,14 @@ class BudgetDatabase(Database):
         parameters = (event_id, requirement_name, requirement_budget, requirement_quantity)
         self.execute_query(query, parameters)
 
-    def get_budget_by_event(self, event_id):
+    def delete_budget(self, event_id, requirement_name):
+        query = """
+        DELETE FROM Budget WHERE EventID = ? AND RequirementName = ?
+        """
+        parameters = (event_id, requirement_name)
+        self.execute_query(query, parameters)
+
+    def get_budget_list(self, event_id):
         query = """
         SELECT * FROM Budget WHERE EventID = ?
         """

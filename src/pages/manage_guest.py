@@ -9,7 +9,7 @@ from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
 class GuestManagerApp:
-    def __init__(self, page, event_id):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Guest Management"
         self.event_id = event_id
@@ -19,11 +19,16 @@ class GuestManagerApp:
 
         self.controller = GuestController()
         self.guest_list_form = GuestListForm()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         self.controller.add_guest_list(1, "Alice", "Hadir")
         self.controller.add_guest_list(1, "Bob", "Menyusul")
         self.controller.add_guest_list(1, "Charlie", "Tidak Hadir")
-        self.controller.display_guest_list(1)
+        self.controller.display_guest_list(event_id)
 
         # Pagination variables
         self.current_page = 0
@@ -91,7 +96,7 @@ class GuestManagerApp:
                 )
             ),
             color="#4539B4",
-            on_click=lambda e: self.add_guest(e, self.event_id)
+            on_click=lambda e: self.add_guest(e, self.event_id, guest_id=None)
         )
 
         self.back_button = BackButton(
@@ -104,12 +109,6 @@ class GuestManagerApp:
         self.page.add(
             ft.Column(
                 [   
-                    ft.Container(
-                        content=self.back_button,
-                        alignment=ft.alignment.top_left,
-                        padding=ft.padding.all(10),
-                    ),
-
                     ft.Container(
                         content=self.back_button,
                         alignment=ft.alignment.top_left,
@@ -141,24 +140,15 @@ class GuestManagerApp:
             )
         )
 
-    def add_guest(self, e, event_id):
-        self.guest_list_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
+    def add_guest(self, e, event_id, guest_id):
+        self.guest_list_form.display_form(self.page, self.on_form_submit, event_id, guest_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
         # Clear current page content
         self.page.controls.clear()
         # Load EventManagerApp
-        EventManagerApp(self.page)
-        self.page.update()
-
-
-    def back_to_event_manager(self, e):
-        from src.pages.manage_event import EventManagerApp
-        # Clear current page content
-        self.page.controls.clear()
-        # Load EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
         
     def edit_guest(self, event_id, guest_id):
@@ -173,10 +163,12 @@ class GuestManagerApp:
             self.guest_list_form.display_form(
                 page=self.page, 
                 on_submit=self.on_form_submit,
-                event_id=event_id, 
+                event_id=event_id,
+                guest_id=guest_id, 
                 guest_list_data=guest_data, 
                 is_edit=True, 
             )
+            print(f"edit_vendor called with event_id={event_id}, guest_id={guest_id}")
         else:
             self.show_error_dialog("Guest not found.")
     
@@ -188,7 +180,7 @@ class GuestManagerApp:
             self.show_error_dialog("Guest not found.")
 
     def update_display(self):
-        total_pages = (len(self.controller.get_all_guest_list()) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+        total_pages = (len(self.controller.get_guest_list(self.event_id)) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -196,7 +188,7 @@ class GuestManagerApp:
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = start_index + ITEMS_PER_PAGE
 
-        guests_to_display = self.controller.get_all_guest_list()
+        guests_to_display = self.controller.get_guest_list(self.event_id)
         self.tree.rows.clear()
         for guest in guests_to_display[start_index:end_index]:
             self.tree.rows.append(
@@ -218,10 +210,11 @@ class GuestManagerApp:
             )
         self.page.update()
 
-    def on_form_submit(self, form_data, is_edit, event_id):
+    def on_form_submit(self, form_data, is_edit, event_id, guest_id):
         if is_edit:
             self.controller.edit_guest_list(
-                event_id, 
+                event_id,
+                guest_id, 
                 form_data["GuestName"],
                 form_data["RSVPStatus"]
                 )
@@ -242,7 +235,8 @@ class GuestManagerApp:
 
     def next_page(self, e):
         """Go to the next page."""
-        total_pages = len(self.controller.guest_list) // self.guests_per_page + 1
+        total_guests = self.controller.get_guest_list(self.event_id)
+        total_pages = (len(total_guests) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
         if self.current_page < total_pages:
             self.current_page += 1
             self.update_display()
@@ -278,8 +272,8 @@ class GuestManagerApp:
 
 
     
-def main(page: ft.Page):
-    app = GuestManagerApp(page, 1)
+# def main(page: ft.Page):
+#     app = GuestManagerApp(page, 1)
 
-if __name__ == "__main__":
-    ft.app(target=main)
+# if __name__ == "__main__":
+#     ft.app(target=main)

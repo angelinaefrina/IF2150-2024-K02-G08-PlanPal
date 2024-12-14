@@ -10,9 +10,9 @@ class BudgetForm:
         
         # Set default values if budget_data is None
         event_id = event_id
-        requirement_name = budget_data["RequirementName"] if budget_data else ""
-        requirement_budget = str(budget_data["RequirementBudget"]) if budget_data else ""
-        requirement_quantity = str(budget_data["RequirementQuantity"]) if budget_data else ""
+        requirement_name = budget_data[1] if budget_data else ""
+        requirement_budget = str(budget_data[2]) if budget_data else ""
+        requirement_quantity = str(budget_data[3]) if budget_data else ""
 
         # Create the dialog
         self.dialog = ft.AlertDialog(
@@ -54,11 +54,13 @@ class BudgetForm:
             # else:
             #     raise ValueError("Event ID must be a valid number.")
 
+            print(len(self.dialog.content.controls)), # Print the length of controls
+
             form_data = {
-                # "EventID": int(event_id),
-                "RequirementName": self.dialog.content.controls[1].value,
-                "RequirementBudget": float(self.dialog.content.controls[2].value),
-                "RequirementQuantity": int(self.dialog.content.controls[3].value),
+                "EventID": int(event_id),
+                "RequirementName": self.dialog.content.controls[0].value,
+                "RequirementBudget": float(self.dialog.content.controls[1].value),
+                "RequirementQuantity": int(self.dialog.content.controls[2].value),
             }
 
             # Validate the form data
