@@ -10,7 +10,7 @@ from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
 class RundownManagerApp:
-    def __init__(self, page, event_id):
+    def __init__(self, page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "Rundown Management"
         self.event_id = event_id
@@ -19,8 +19,13 @@ class RundownManagerApp:
         self.setup_page()
 
         # Initialize Controller and Page
-        self.rundown_controller = RundownController()
-        self.rundown_page = RundownPage(self.rundown_controller)
+        self.rundown_controller = RundownController(rundown_db)
+        self.rundown_page = RundownPage()
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         self.current_page = 0
         self.create_widgets()
@@ -91,7 +96,7 @@ class RundownManagerApp:
                 )
             ),
             color= '#4539B4',
-            on_click= self.add_rundown
+            on_click= self.add_rundown(self, self.event_id)
         )
         
         self.back_button = BackButton(
@@ -271,6 +276,6 @@ class RundownManagerApp:
 
 
 # def main(page: ft.Page):
-#     app = RundownManagerApp(page, event_id)
+#     app = RundownManagerApp(page)
 
 # ft.app(target=main)

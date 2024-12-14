@@ -43,9 +43,9 @@ class VendorManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "C:/Users/Lenovo/Documents/RPL/tubes/PlanPal/src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "./src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "./src/assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "./src/assets/fonts/Afacad/Afacad-Regular.ttf",
         }
         # Header PlanPal
         self.page.add(
