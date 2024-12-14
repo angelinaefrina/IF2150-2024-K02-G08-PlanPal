@@ -96,7 +96,7 @@ class GuestManagerApp:
                 )
             ),
             color="#4539B4",
-            on_click=lambda e: self.add_guest(e, self.event_id)
+            on_click=lambda e: self.add_guest(e, self.event_id, guest_id=None)
         )
 
         self.back_button = BackButton(
@@ -140,8 +140,8 @@ class GuestManagerApp:
             )
         )
 
-    def add_guest(self, e, event_id):
-        self.guest_list_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
+    def add_guest(self, e, event_id, guest_id):
+        self.guest_list_form.display_form(self.page, self.on_form_submit, event_id, guest_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
