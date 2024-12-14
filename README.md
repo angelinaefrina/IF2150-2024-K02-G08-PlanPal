@@ -40,23 +40,23 @@ python planpal.py
 ## Daftar Modul
 
 ### Modul Event
-![All Events](test/All_Events.png)  
-![Event Details](test/Event_Details.png)  
-![Add Events](test/Add_Event.png)  
-![Add Event Success](test/Add_Event_Success.png)  
-![Edit Events](test/Edit_Event.png)  
+![All Events](doc/All_Events.png)  
+![Event Details](doc/Event_Details.png)  
+![Add Events](doc/Add_Event.png)  
+![Add Event Success](doc/Add_Event_Success.png)  
+![Edit Events](doc/Edit_Event.png)  
 
 
 ### Modul Anggaran
-![Anggaran Details](test/Anggaran_Details.jpg)  
-![Add Anggaran](test/Add_Anggaran.jpg)  
-![Edit Anggaran](test/Edit_Anggaran.jpg)  
+![Anggaran Details](doc/Anggaran_Details.jpg)  
+![Add Anggaran](doc/Add_Anggaran.jpg)  
+![Edit Anggaran](doc/Edit_Anggaran.jpg)  
 
 
 ### Modul Vendor
-![Vendor Details](test/Vendor_Details.jpg)  
-![Add Vendor](test/Add_Vendor.jpg)  
-![Edit Vendor](test/Edit_Vendor.jpg)  
+![Vendor Details](doc/Vendor_Details.jpg)  
+![Add Vendor](doc/Add_Vendor.jpg)  
+![Edit Vendor](doc/Edit_Vendor.jpg)  
 
 
 ### Modul Guest List
@@ -64,9 +64,9 @@ python planpal.py
 
 
 ### Modul Rundown
-![Rundown Details](test/Rundown_Details.png)  
-![Add Rundown](test/Add_Rundown.png)  
-![Edit Rundown](test/Edit_Rundown.jpg)  
+![Rundown Details](doc/Rundown_Details.png)  
+![Add Rundown](doc/Add_Rundown.png)  
+![Edit Rundown](doc/Edit_Rundown.jpg)  
 
 
 
