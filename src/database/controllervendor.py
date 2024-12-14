@@ -16,6 +16,16 @@ class ControllerVendor:
         else:
             print("Gagal menambahkan vendor. Data tidak valid.")
 
+    def edit_vendor(self, original_event_id, vendor_name, vendor_contact, vendor_product):
+        # Find the budget entry to update
+        for vendor in self.vendor_database:
+            if vendor["EventID"] == original_event_id:
+                vendor["VendorName"] = vendor_name
+                vendor["VendorContact"] = vendor_contact
+                vendor["VendorProduct"] = vendor_product
+                print(f"Updated budget: {vendor}")
+                break
+
     def validate_vendor(self, vendor_data):
         required_fields = ["EventID", "VendorName", "VendorContact", "VendorProduct"]
         for field in required_fields:

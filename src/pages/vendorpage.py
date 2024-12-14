@@ -146,8 +146,9 @@ class VendorManagerApp:
                 is_edit=True,
                 original_event_id=event_id,
             )
+            print(f"edit_vendor called with event_id={event_id}, vendor_name={vendor_name}")
         else:
-            self.show_error_dialog(f"Vendor not found for Event ID '{event_id}' and Vendor Name '{vendor_name}'.")
+            self.show_error_dialog(f"Vendor not found for Event ID '{event_id}'")
 
     def delete_vendor(self, event_id, vendor_name):
         if self.controller.get_vendor_by_event_id(event_id):
