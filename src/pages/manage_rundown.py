@@ -1,15 +1,19 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 import flet as ft
-from rundown import Rundown
-from rundownpage import RundownPage
-from rundowncontroller import RundownController
-from utils.buttons import *
-from utils.pagesetup import PageSetup
+from src.database.rundown import Rundown
+from src.database.rundownpage import RundownPage
+from src.database.rundowncontroller import RundownController
+from src.utils.buttons import *
+from src.utils.pagesetup import PageSetup
 
-ITEMS_PER_PAGE = 6
+ITEMS_PER_PAGE = 5
 class RundownManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_id):
         self.page = page
         self.page.title = "Rundown Management"
+        self.event_id = event_id
 
         # Setup page
         self.setup_page()
@@ -58,7 +62,6 @@ class RundownManagerApp:
                 ft.DataColumn(ft.Text("Nama", color= '#4539B4')),
                 ft.DataColumn(ft.Text("Start", color= '#4539B4')),
                 ft.DataColumn(ft.Text("End", color= '#4539B4')),
-                # ft.DataColumn(ft.Text("Durasi (Menit)", color= '#4539B4')),
                 ft.DataColumn(ft.Text("PIC", color= '#4539B4')),
                 ft.DataColumn(ft.Text("")),
             ],
@@ -91,12 +94,21 @@ class RundownManagerApp:
             on_click= self.add_rundown
         )
         
+        self.back_button = BackButton(
+        on_click_action=self.back_to_event_manager, font_family="Default_Bold"
+        )
+
         self.prev_button = ft.ElevatedButton(text="Prev", on_click=self.prev_page, disabled=True)
         self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page, disabled=True)
 
         self.page.add(
             ft.Column(
                 [
+                    ft.Container(
+                        content=self.back_button,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.padding.all(10),
+                    ),
                     ft.Container(
                         content= self.title,
                         alignment= ft.alignment.center,
@@ -123,9 +135,17 @@ class RundownManagerApp:
             )
         )
 
-    def add_rundown(self, e):
-        self.rundown_page.display_form(self.page, self.on_form_submit, is_edit=False)
+    def add_rundown(self, e, event_id):
+        self.rundown_page.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
         
+    def back_to_event_manager(self, e):
+        from pages.manage_event import EventManagerApp
+        # Clear current page content
+        self.page.controls.clear()
+        # Load EventManagerApp
+        EventManagerApp(self.page)
+        self.page.update()
+
     def edit_rundown(self, event_id, agenda_name):
         rundowns = self.rundown_controller.get_rundown_list(event_id)
 
@@ -138,9 +158,9 @@ class RundownManagerApp:
             self.rundown_page.display_form(
                 page= self.page,
                 on_submit= self.on_form_submit,
+                event_id= event_id,
                 rundown_data= rundown_data,
                 is_edit= True,
-                original_event_id= event_id
             )
         else:
             self.show_error_dialog("Rundown not found.")
@@ -170,7 +190,6 @@ class RundownManagerApp:
                         ft.DataCell(ft.Text(rundown["AgendaName"])),
                         ft.DataCell(ft.Text(rundown["AgendaTimeStart"])),
                         ft.DataCell(ft.Text(rundown["AgendaTimeEnd"])),
-                        # ft.DataCell(ft.Text(rundown["AgendaTimeEnd"] - rundown["AgendaTimeStart"])),
                         ft.DataCell(ft.Text(rundown["AgendaPIC"])),
                         ft.DataCell(
                             ft.Row(
@@ -197,21 +216,22 @@ class RundownManagerApp:
             self.current_page += 1
             self.update_display()
 
-    def on_form_submit(self, form_data, is_edit, original_event_id):
+    def on_form_submit(self, form_data, is_edit, event_id):
+        # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
         if is_edit:
             self.rundown_controller.edit_rundown(
-                original_event_id,
+                event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"],
-                form_data["AgendaTimeEnd"],
+                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
+                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
                 form_data["AgendaPIC"]
             )
         else:
             self.rundown_controller.add_rundown(
-                form_data["EventID"],
+                event_id,
                 form_data["AgendaName"],
-                form_data["AgendaTimeStart"],
-                form_data["AgendaTimeEnd"],
+                form_data["AgendaTimeStart"].strftime("%H:%M"),  # Convert TimePicker to string
+                form_data["AgendaTimeEnd"].strftime("%H:%M"),  # Convert TimePicker to string
                 form_data["AgendaPIC"]
             )
         self.update_display()
@@ -238,7 +258,7 @@ class RundownManagerApp:
 
     def close_error_dialog(self):
         self.page.dialog.open = False
-        self.page.update()
+        self.page.update
 
     def close_success_dialog(self):
         self.page.dialog.open = False

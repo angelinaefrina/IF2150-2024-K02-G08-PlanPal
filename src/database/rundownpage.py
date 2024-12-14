@@ -1,42 +1,16 @@
 import flet as ft
-from utils.buttons import *
+from src.utils.buttons import *
 
 class RundownPage:
-    def __init__(self, rundown_controller):
-        self.rundown_controller = rundown_controller
-
-    def display_rundown(self, event_id):
-        print(f"=== Rundown untuk EventID {event_id} ===")
-        event_rundowns = [
-            rundown for rundown in self.rundown_controller.rundown_list
-            if rundown["EventID"] == event_id
-        ]
-
-        if not event_rundowns:
-            print("No rundowns available to display.")
-            return
-
-        self.arrange_rundown()
-        for rundown in event_rundowns:
-            print(
-                f"- Agenda: {rundown['AgendaName']}, "
-                f"Start: {rundown['AgendaTimeStart']}, "
-                f"End: {rundown['AgendaTimeEnd']}, "
-                f"Duration: {rundown['AgendaDuration']} minutes, "
-                f"PIC: {rundown['AgendaPIC']}"
-            )
-        print("=============================")
-    
-    def arrange_rundown(self):
-        if self.rundown_controller.rundown_list:
-            self.rundown_controller.rundown_list.sort(key=lambda rundown: rundown.agenda_time_start)
-            print("Rundown has been arranged from the earliest to the latest time.")
+    def __init__(self):
+        self
+        self.rundown_details = None
 
     def display_form(self, page, on_submit, rundown_data=None, is_edit=False, original_event_id=None):
         print("Displaying rundown form with rundown data...", rundown_data)
 
         # Set default
-        event_id = str(rundown_data["EventID"]) if rundown_data else ""
+        event_id = event_id
         agenda_name = rundown_data["AgendaName"] if rundown_data else ""
         agenda_time_start = rundown_data["AgendaTimeStart"] if rundown_data else ""
         agenda_time_end = rundown_data["AgendaTimeEnd"] if rundown_data else ""
@@ -46,7 +20,7 @@ class RundownPage:
         self.dialog = ft.AlertDialog(
             title=ft.Text("Edit Rundown" if is_edit else "Add Rundown"),
             content=ft.Column([
-                ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
+                # ft.TextField(label="Event ID", value=event_id, color="#4539B4", on_change=self.validate_integer),
                 ft.TextField(label="Agenda Name", value=agenda_name, color="#4539B4"),
                 ft.TextField(label="Start Time", value=agenda_time_start, color="#4539B4"),
                 ft.TextField(label="End Time", value=agenda_time_end, color="#4539B4"),
@@ -70,20 +44,20 @@ class RundownPage:
             e.control.error_text = None
         e.control.update()
 
-    def submit_form(self, page, on_submit, is_edit, original_event_id):
+    def submit_form(self, page, event_id, on_submit, is_edit):
         print("Submitting form...")
         try:
             # Collecting values from the form
-            event_id = self.dialog.content.controls[0].value
-            if isinstance(event_id, int):
-                pass
-            elif event_id.isdigit():
-                event_id = int(event_id)  # Convert it to an integer if it's a string
-            else:
-                raise ValueError("Event ID must be a valid number.")
+            event_id = event_id
+            # if isinstance(event_id, int):
+            #     pass
+            # elif event_id.isdigit():
+            #     event_id = int(event_id)  # Convert it to an integer if it's a string
+            # else:
+            #     raise ValueError("Event ID must be a valid number.")
 
             form_data = {
-                "EventID": int(event_id),
+                # "EventID": int(event_id),
                 "AgendaName": self.dialog.content.controls[1].value,
                 "AgendaTimeStart": self.dialog.content.controls[2].value,
                 "AgendaTimeEnd": self.dialog.content.controls[3].value,
@@ -100,9 +74,9 @@ class RundownPage:
 
                 # If editing, we update the existing entry; if adding, we add a new entry
                 if is_edit:
-                    on_submit(form_data, is_edit, original_event_id)
+                    on_submit(form_data, is_edit, event_id)
                 else:
-                    on_submit(form_data, is_edit, original_event_id=None)
+                    on_submit(form_data, is_edit, event_id)
             else:
                 self.display_error_message("Invalid form data. Please check the form and try again.")
         except ValueError as e:

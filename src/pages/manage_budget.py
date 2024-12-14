@@ -1,9 +1,6 @@
 import sys
 import os
-
-# Add the src directory to the sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
 import flet as ft
 from src.database.budget import Budget
 from src.database.budgetpage import BudgetPage
@@ -15,9 +12,10 @@ from src.utils.pagesetup import PageSetup
 
 ITEMS_PER_PAGE = 5
 class BudgetManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_id):
         self.page = page
         self.page.title = "Budget Management"
+        self.event_id = event_id
 
         # Setup page
         self.setup_page()
@@ -97,7 +95,7 @@ class BudgetManagerApp:
                 )
             ),
             color= "#4539B4", 
-            on_click=self.add_budget
+            on_click=lambda e: self.add_budget(e, self.event_id)
         )
 
         self.back_button = BackButton(
@@ -141,9 +139,9 @@ class BudgetManagerApp:
             )
         )
 
-    def add_budget(self, e):
+    def add_budget(self, e, event_id):
         print("Add Budget button clicked.")
-        self.budget_form.display_form(self.page, self.on_form_submit, is_edit=False)
+        self.budget_form.display_form(self.page, self.on_form_submit, event_id, is_edit=False)
 
     def back_to_event_manager(self, e):
         from src.pages.manage_event import EventManagerApp
@@ -152,7 +150,6 @@ class BudgetManagerApp:
         # Load EventManagerApp
         EventManagerApp(self.page)
         self.page.update()
-
 
     def edit_budget(self, event_id, requirement_name):
         print("Edit Budget button clicked.")
@@ -168,9 +165,9 @@ class BudgetManagerApp:
             self.budget_form.display_form(
                 page=self.page,
                 on_submit=self.on_form_submit,
+                event_id=event_id,
                 budget_data=budget_data,
                 is_edit=True,
-                original_event_id=event_id,
             )
         else:
             self.show_error_dialog(f"Budget not found for Event ID '{event_id}' and Requirement Name '{requirement_name}'.")
@@ -234,17 +231,17 @@ class BudgetManagerApp:
             self.current_page += 1
             self.update_display()
 
-    def on_form_submit(self, form_data, is_edit, original_event_id):
+    def on_form_submit(self, form_data, is_edit, event_id):
         if is_edit:
             self.controller.edit_budget(
-                original_event_id, 
+                event_id, 
                 form_data["RequirementName"], 
                 form_data["RequirementBudget"], 
                 form_data["RequirementQuantity"]
                 )
         else:
             self.controller.add_budget(
-                form_data["EventID"], 
+                event_id, 
                 form_data["RequirementName"], 
                 form_data["RequirementBudget"], 
                 form_data["RequirementQuantity"]
@@ -280,7 +277,7 @@ class BudgetManagerApp:
         self.page.update()
 
 def main(page: ft.Page):
-    app = BudgetManagerApp(page)
+    app = BudgetManagerApp(page, 1)
     
 if __name__ == "__main__":
     ft.app(target=main)
