@@ -128,3 +128,20 @@ class ViewDetailsButton(ft.ElevatedButton):
             on_click= on_click_action
         )
 
+class BackButton(ft.ElevatedButton):
+    def __init__(self, on_click_action=None, font_family=None):
+        super().__init__(
+            text="Back",
+            style=ft.ButtonStyle(
+                padding=ft.padding.symmetric(horizontal=20, vertical=10),
+                bgcolor="#C4E8F8",
+                shape=ft.RoundedRectangleBorder(radius=20),
+                text_style=ft.TextStyle(
+                    color="#4539B4",
+                    weight=ft.FontWeight.BOLD,
+                    font_family=font_family,
+                    size=20,
+                ),
+            ),
+            on_click=on_click_action,
+        )

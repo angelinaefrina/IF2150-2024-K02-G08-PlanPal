@@ -42,6 +42,9 @@ class BudgetManagerApp:
             "Header": "../src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
             "Default_Bold": "../src/assets/fonts/Afacad/Afacad-Bold.ttf",
             "Default_Regular": "../src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "../assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "../assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "../assets/fonts/Afacad/Afacad-Regular.ttf",
         }
         # Header PlanPal
         self.page.add(
@@ -99,6 +102,10 @@ class BudgetManagerApp:
             color= "#4539B4", 
             on_click=self.add_budget
         )
+
+        self.back_button = BackButton(
+        on_click_action=self.back_to_event_manager, font_family="Default_Bold"
+        )
         
         self.prev_button = ft.ElevatedButton(text="Previous", on_click=self.prev_page, disabled=True)
         self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page, disabled=True)
@@ -126,6 +133,11 @@ class BudgetManagerApp:
                         alignment= ft.MainAxisAlignment.CENTER,
                         spacing= 20,
                     ),
+                    ft.Container(
+                        content=self.back_button,
+                        alignment=ft.alignment.bottom_left,
+                        padding=ft.padding.all(10),
+                    ),
                 ],
                 alignment=ft.MainAxisAlignment.START,
                 expand=True,
@@ -135,6 +147,15 @@ class BudgetManagerApp:
     def add_budget(self, e):
         print("Add Budget button clicked.")
         self.budget_form.display_form(self.page, self.on_form_submit, is_edit=False)
+
+    def back_to_event_manager(self, e):
+        from src.pages.manage_event import EventManagerApp
+        # Clear current page content
+        self.page.controls.clear()
+        # Load EventManagerApp
+        EventManagerApp(self.page)
+        self.page.update()
+
 
     def edit_budget(self, event_id, requirement_name):
         print("Edit Budget button clicked.")
@@ -265,5 +286,6 @@ class BudgetManagerApp:
 
 def main(page: ft.Page):
     app = BudgetManagerApp(page)
-
-ft.app(target=main)
+    
+if __name__ == "__main__":
+    ft.app(target=main)

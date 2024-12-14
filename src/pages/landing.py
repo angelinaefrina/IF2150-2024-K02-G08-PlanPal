@@ -14,11 +14,14 @@ from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.pages.manage_event import EventManagerApp
 
+# Import Pages
+from src.pages.manage_budget import BudgetManagerApp
 
 class LandingApp:
     def __init__(self, page):
         self.page = page
-        self.page.title = "Event Manager"
+        self.page.title = "PlanPal"
+        self.page.theme_mode = ft.ThemeMode.LIGHT
 
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
@@ -45,9 +48,9 @@ class LandingApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "../src/assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "../src/assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "../src/assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "../assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "../assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "../assets/fonts/Afacad/Afacad-Regular.ttf",
         }
 
         # Add the header (PlanPal text) at the top of the page
@@ -87,10 +90,33 @@ class LandingApp:
         else:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
-    def view_event(self, event_id):
+    def view_event(self, page, event_id):
         event_data = self.controller.get_event_details(event_id)
         if event_data:
-            self.form_event.display_form(self.page, self.on_form_submit, event_data, is_edit=False, original_event_id=event_id)
+            self.dialog = ft.AlertDialog(
+                title=ft.Text("Event Details"),
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"Event ID: {event_data['EventID']}"),
+                        ft.Text(f"Event Name: {event_data['EventName']}"),
+                        ft.Text(f"Event Location: {event_data['EventLocation']}"),
+                        ft.Text(f"Event Date: {event_data['EventDate']}"),
+                        ft.Text(f"Event Status: {event_data['EventStatus']}")
+                    ],
+                        height=300,
+                    spacing=20,
+                    alignment=ft.MainAxisAlignment.START
+                ),
+                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
+                         ft.TextButton("Lihat Rundown"),
+                         ft.TextButton("Daftar Vendor"),
+                         ft.TextButton("Daftar Tamu")
+                        ]
+            )
+            page.dialog = self.dialog
+            self.dialog.open = True
+            page.update()
+
         else:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
@@ -109,7 +135,7 @@ class LandingApp:
             card = EventCard(
                 event_title=event["EventName"],
                 event_date=event["EventDate"],
-                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(event_id),
+                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(self.page, event_id),
                 on_edit_click=lambda e, event_id=event["EventID"]: self.edit_event(event_id),
                 on_delete_click=lambda e, event_id=event["EventID"]: self.delete_event(event_id)
             )
@@ -117,18 +143,6 @@ class LandingApp:
             if len(row) == 3 or index == len(events_to_display) - 1:
                 rows.append(ft.Row(controls=row, spacing=20, alignment=ft.MainAxisAlignment.CENTER))
                 row = []
-
-        display_container = ft.Container(
-            content=ft.Column(
-                controls=rows,
-                spacing=20,
-                alignment=ft.MainAxisAlignment.START,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                expand=True,
-            ),
-            expand=True,
-            alignment=ft.alignment.top_center,
-        )
 
         # self.page.add(display_container)
 
@@ -160,6 +174,7 @@ class LandingApp:
                                         shape=ft.RoundedRectangleBorder(radius=20),
                                         icon_size=64
                                     ),
+                                    on_click=self.open_manage_event
                                 ),
                                 alignment=ft.alignment.center_right,
                                 padding=ft.padding.only(left=20),
@@ -245,6 +260,12 @@ class LandingApp:
 
     def close_success_dialog(self):
         self.page.dialog.open = False
+        self.page.update()
+
+    def open_budget_page(self, e):
+        self.page.controls.clear()
+        self.dialog.open = False
+        BudgetManagerApp(self.page)
         self.page.update()
 
 def main(page: ft.Page):
