@@ -247,8 +247,8 @@ class RundownManagerApp:
     def on_form_submit(self, form_data, is_edit, event_id):
         # Use time values from TimePickers for AgendaTimeStart and AgendaTimeEnd
         try:
-            agenda_time_start = datetime.strptime(form_data["AgendaTimeStart"], "%H:%M")
-            agenda_time_end = datetime.strptime(form_data["AgendaTimeEnd"], "%H:%M")
+            agenda_time_start = datetime.strptime(form_data["AgendaTimeStart (%H:%M)"], "%H:%M")
+            agenda_time_end = datetime.strptime(form_data["AgendaTimeEnd (%H:%M)"], "%H:%M")
         except ValueError as e:
             self.show_error_dialog(f"Invalid time format: {e}")
             return
