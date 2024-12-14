@@ -32,6 +32,9 @@ class EventManagerApp:
         self.vendor_db = vendor_db
         self.rundown_db = rundown_db
 
+        # Initialize dialog attribute
+        self.dialog = None
+
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
 
@@ -114,8 +117,8 @@ class EventManagerApp:
                 ),
                 actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
                          ft.TextButton("Lihat Rundown", on_click=self.open_rundown_page),
-                         ft.TextButton("Daftar Vendor",  on_click=self.open_vendor_page),
-                         ft.TextButton("Daftar Tamu",  on_click=self.open_guest_page)
+                         ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
+                         ft.TextButton("Daftar Tamu", on_click=self.open_guest_page)
                         ]
             )
             page.dialog = self.dialog
@@ -213,82 +216,87 @@ class EventManagerApp:
     def on_form_submit(self, form_data, is_edit, original_event_id=None):
         if form_data:
             if is_edit:
-                    self.controller.delete_event(original_event_id)
-                    self.controller.add_event(
-                        original_event_id,
-                        form_data["EventName"],
-                        form_data["EventLocation"],
-                        form_data["EventDate"],
-                        form_data["EventStatus"]
-                    )
-                    self.show_success_dialog("Event updated successfully!")
+                self.controller.delete_event(original_event_id)
+                self.controller.add_event(
+                    original_event_id,
+                    form_data["EventName"],
+                    form_data["EventLocation"],
+                    form_data["EventDate"],
+                    form_data["EventStatus"]
+                )
+                self.show_success_dialog("Event updated successfully!")
             else:
-                    new_event_id = self.event_db.get_max_event_id() + 1
-                    self.controller.add_event(
-                        new_event_id,
-                        form_data["EventName"],
-                        form_data["EventLocation"],
-                        form_data["EventDate"],
-                        form_data["EventStatus"]
-                    )
-                    self.show_success_dialog("Event added successfully!")
+                new_event_id = self.event_db.get_max_event_id() + 1
+                self.controller.add_event(
+                    new_event_id,
+                    form_data["EventName"],
+                    form_data["EventLocation"],
+                    form_data["EventDate"],
+                    form_data["EventStatus"]
+                )
+                self.show_success_dialog("Event added successfully!")
             self.update_display()
 
     def show_error_dialog(self, message):
-        error_dialog = ft.AlertDialog(
+        self.dialog = ft.AlertDialog(
             title=ft.Text("Error"),
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=lambda e: self.close_error_dialog())]
         )
-        self.page.dialog = error_dialog
-        error_dialog.open = True
+        self.page.dialog = self.dialog
+        self.dialog.open = True
         self.page.update()
 
     def show_success_dialog(self, message):
-        success_dialog = ft.AlertDialog(
+        self.dialog = ft.AlertDialog(
             title=ft.Text("Success"),
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=lambda e: self.close_success_dialog())]
         )
-        self.page.dialog = success_dialog
-        success_dialog.open = True
+        self.page.dialog = self.dialog
+        self.dialog.open = True
         self.page.update()
 
     def close_error_dialog(self):
-        self.page.dialog.open = False
-        self.page.update()
+        if self.dialog:
+            self.dialog.open = False
+            self.page.update()
 
     def close_success_dialog(self):
-        self.page.dialog.open = False
-        self.page.update()
+        if self.dialog:
+            self.dialog.open = False
+            self.page.update()
 
     def open_budget_page(self, e):
         self.page.controls.clear()
-        self.dialog.open = False
+        if self.dialog:
+            self.dialog.open = False
         BudgetManagerApp(self.page)
         self.page.update()
 
     def open_guest_page(self, e):
         self.page.controls.clear()
-        self.dialog.open = False
+        if self.dialog:
+            self.dialog.open = False
         GuestManagerApp(self.page)
         self.page.update()
 
-    def open_vendor_page(self, e):
+    def open_vendor_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        VendorManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        VendorManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
     def open_rundown_page(self, e):
         self.page.controls.clear()
-        self.dialog.open = False
+        if self.dialog:
+            self.dialog.open = False
         RundownManagerApp(self.page)
         self.page.update()
 
 def main(page: ft.Page):
     app = EventManagerApp(page, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
-
 
 if __name__ == "__main__":
     ft.app(target=main)

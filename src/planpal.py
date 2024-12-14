@@ -54,8 +54,8 @@ class PlanPal:
         if not self.event_db.get_all_events():
             # Add sample events
             self.event_db.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
-            self.event_db.add_event(2, "Event B", "Location B", "2023-10-02", "Berlangsung")
-            self.event_db.add_event(3, "Event C", "Location C", "2023-10-03", "Selesai")
+            self.event_db.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
+            self.event_db.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
 
     def open_manage_event(self, e):
         # Clear the current page content
