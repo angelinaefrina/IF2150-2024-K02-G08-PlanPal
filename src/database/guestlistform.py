@@ -5,11 +5,11 @@ class GuestListForm:
     def __init__(self):
         self.guest_details = None
 
-    def display_form(self, page, on_submit, guest_list_data=None, is_edit=False, original_event_id=None):
+    def display_form(self, page, on_submit, event_id, guest_list_data=None, is_edit=False):
         print("Displaying form with guest list data:", guest_list_data)
 
         # Set default values if guest_list_data is None
-        event_id = str(guest_list_data["EventID"]) if guest_list_data else ""
+        event_id = event_id
         guest_name = guest_list_data["GuestName"] if guest_list_data else ""
         rsvp_status = guest_list_data["RSVPStatus"] if guest_list_data else ""
 
@@ -30,7 +30,7 @@ class GuestListForm:
                 height=300,
             ),
             actions=[
-                SaveButton(on_click_action=lambda e: self.submit_form(page, on_submit, is_edit, original_event_id)),
+                SaveButton(on_click_action=lambda e: self.submit_form(page, event_id, on_submit, is_edit)),
                 CancelButton(on_click_action=lambda e: self.close_dialog(page)),
             ]
         )
@@ -38,28 +38,28 @@ class GuestListForm:
         self.dialog.open = True
         page.update()
 
-    def submit_form(self, page, on_submit, is_edit, original_event_id):
+    def submit_form(self, page, event_id, on_submit, is_edit):
         """Handle form submission by validating and passing data to the controller."""
         print("Submitting form...")
         try:
             # Collecting values from the form
-            event_id = self.dialog.content.controls[0].value
-            if isinstance(event_id, int):
-                pass
-            elif event_id.isdigit():
-                event_id = int(event_id)  # Convert it to an integer if it's a string
-            else:
-                raise ValueError("Event ID must be a valid number.")
+            event_id = event_id
+            # if isinstance(event_id, int):
+            #     pass
+            # elif event_id.isdigit():
+            #     event_id = int(event_id)  # Convert it to an integer if it's a string
+            # else:
+            #     raise ValueError("Event ID must be a valid number.")
 
             form_data = {
                 # "EventID": int(event_id),
-                "GuestName": self.dialog.content.controls[1].value,
-                "RSVPStatus": self.dialog.content.controls[2].value,
+                "GuestName": self.dialog.content.controls[0].value,
+                "RSVPStatus": self.dialog.content.controls[1].value,
             }
 
             # Validate the form data
             if self.validate_form_data(form_data):
-                self.budget_details = form_data  # Store the form data
+                self.guest_details = form_data  # Store the form data
 
                 # Close the dialog once the data is valid
                 self.close_dialog(page)
@@ -67,11 +67,11 @@ class GuestListForm:
 
                 # If editing, we update the existing entry; if adding, we add a new entry
                 if is_edit:
-                    print(f"Editing guest for EventID: {original_event_id}")
-                    on_submit(form_data, is_edit, original_event_id)  # Update existing entry
+                    print(f"Editing guest for EventID: {event_id}")
+                    on_submit(form_data, is_edit, event_id)  # Update existing entry
                 else:
                     print("Adding new guest")
-                    on_submit(form_data, is_edit, original_event_id=None)  # Add new entry
+                    on_submit(form_data, is_edit, event_id)  # Add new entry
             else:
                 self.display_error_message("Form data is invalid.")
         except ValueError as e:
@@ -87,7 +87,7 @@ class GuestListForm:
 
     def validate_form_data(self, form_data):
         # Ensure that all required fields are filled out
-        required_fields = ["EventID", "GuestName", "RSVPStatus"]
+        required_fields = ["GuestName", "RSVPStatus"]
         for field in required_fields:
             if field not in form_data or not form_data[field]:
                 self.display_error_message(f"Field '{field}' cannot be empty.")
