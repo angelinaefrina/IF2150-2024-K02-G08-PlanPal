@@ -9,32 +9,40 @@ from src.database.event import Event
 from src.database.eventdisplay import EventDisplay
 from src.database.formevent import FormEvent
 from src.database.controllerevent import ControllerEvent
-from src.utils.cards import EventCard
+from src.utils.cards import LandingCard
 from src.utils.buttons import *
 from src.utils.pagesetup import PageSetup
 from src.pages.manage_event import EventManagerApp
 
 # Import Pages
 from src.pages.manage_budget import BudgetManagerApp
+from src.pages.manage_guest import GuestManagerApp
+from src.pages.manage_vendor import VendorManagerApp
+from src.pages.manage_rundown import RundownManagerApp
 
 class LandingApp:
-    def __init__(self, page):
+    def __init__(self, page, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "PlanPal"
         self.page.theme_mode = ft.ThemeMode.LIGHT
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
 
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
 
         # Now add EventManagerApp components
-        self.controller = ControllerEvent()
+        self.controller = ControllerEvent(event_db)
         self.event_display = EventDisplay(self.controller.get_event_list())
         self.form_event = FormEvent()
 
         # Sample event data
-        self.controller.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
-        self.controller.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
-        self.controller.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
+        # self.controller.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
+        # self.controller.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
+        # self.controller.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
         self.event_display.event_list = self.controller.get_event_list()
 
         self.current_page = 0
@@ -107,9 +115,9 @@ class LandingApp:
                     spacing=20,
                     alignment=ft.MainAxisAlignment.START
                 ),
-                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
+                actions=[ft.TextButton("Lihat Anggaran", on_click=lambda e: self.open_budget_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Lihat Rundown"),
-                         ft.TextButton("Daftar Vendor"),
+                         ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Tamu")
                         ]
             )
@@ -126,18 +134,15 @@ class LandingApp:
         for control in dynamic_controls:
             self.page.controls.remove(control)
 
-
-        events_to_display = self.event_display.event_list[0:3]
+        events_to_display = self.event_display.event_list
 
         rows = []
         row = []
         for index, event in enumerate(events_to_display):
-            card = EventCard(
-                event_title=event["EventName"],
-                event_date=event["EventDate"],
-                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(self.page, event_id),
-                on_edit_click=lambda e, event_id=event["EventID"]: self.edit_event(event_id),
-                on_delete_click=lambda e, event_id=event["EventID"]: self.delete_event(event_id)
+            card = LandingCard(
+                event_title=event[1],
+                event_date=event[3],
+                on_view_details_click=lambda e, event_id=event[0]: self.view_event(self.page, event_id),
             )
             row.append(card)
             if len(row) == 3 or index == len(events_to_display) - 1:
@@ -149,22 +154,18 @@ class LandingApp:
         self.page.add(
             ft.Column(
                 [   
-                    # Welcome Message
                     ft.Text("Welcome to PlanPal!", font_family="Default_Bold", size=64, color="#4539B4"),
                     ft.Text("Manage all your events with PlanPal", font_family="Default_Bold", size=24, color="#4539B4"),
                     ft.Text("Your Events", font_family="Default_Bold", size=24, color="#4539B4"),
 
-                    # Event Cards and Arrow Button Row
                     ft.Row(
                         controls=[
-                            # Event Cards (organized in a row or grid)
                             ft.Row(
                                 controls=rows,
                                 spacing=20,
                                 alignment=ft.MainAxisAlignment.START,
                                 expand=True,
                             ),
-                            # Arrow Button
                             ft.Container(
                                 content=ft.IconButton(
                                     icon=ft.icons.ARROW_CIRCLE_RIGHT_OUTLINED,
@@ -184,7 +185,6 @@ class LandingApp:
                         expand=True,
                     ),
 
-                    # Add New Event Button (at the bottom)
                     ft.Container(
                         content=self.add_button,
                         alignment=ft.alignment.center,
@@ -198,16 +198,13 @@ class LandingApp:
         self.page.update()
 
     def open_manage_event(self, e):
-        # Clear the current page content
         self.page.controls.clear()
-        # Initialize and display the EventManagerApp
-        EventManagerApp(self.page)
+        EventManagerApp(self.page, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)
         self.page.update()
 
     def on_form_submit(self, form_data, is_edit, original_event_id=None):
         if form_data:
             if is_edit:
-                # Check if the new EventID already exists
                 if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
                     self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
                 else:
@@ -262,14 +259,36 @@ class LandingApp:
         self.page.dialog.open = False
         self.page.update()
 
-    def open_budget_page(self, e):
+    def open_budget_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        BudgetManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        BudgetManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
-def main(page: ft.Page):
-    app = LandingApp(page)
+    def open_guest_page(self, e):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        GuestManagerApp(self.page)
+        self.page.update()
 
-if __name__ == "__main__":
-    ft.app(target=main)
+    def open_vendor_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        VendorManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
+        self.page.update()
+
+    def open_rundown_page(self, e):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        RundownManagerApp(self.page)
+        self.page.update()
+
+# def main(page: ft.Page):
+#     app = LandingApp(page, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
+
+# if __name__ == "__main__":
+#     ft.app(target=main)

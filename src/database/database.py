@@ -24,21 +24,35 @@ class EventDatabase(Database):
     def create_event_table(self):
         query = """
         CREATE TABLE IF NOT EXISTS Event (
-            EventID INTEGER PRIMARY KEY AUTOINCREMENT,
+            EventID INTEGER PRIMARY KEY,
+            EventName TEXT NO NULL,
             EventLocation TEXT NOT NULL,
             EventDate DATE NOT NULL,
-            EventStatus TEXT NOT NULL CHECK(EventStatus IN ('Selesai', 'Belum dimulai', 'Berlangsung', 'Batal'))
+            EventStatus TEXT NOT NULL CHECK(EventStatus IN ('Sudah selesai', 'Belum dimulai', 'Sedang berlangsung', 'Batal'))
         );
         """
         self.execute_query(query)
 
-    def add_event(self, event_location, event_date, event_status):
+    def add_event(self, event_id, event_name, event_location, event_date, event_status):
         query = """
-        INSERT INTO Event (EventLocation, EventDate, EventStatus)
-        VALUES (?, ?, ?)
+        INSERT INTO Event (EventId, EventName, EventLocation, EventDate, EventStatus)
+        VALUES (?, ?, ?, ?, ?)
         """
-        parameters = (event_location, event_date, event_status)
+        parameters = (event_id, event_name, event_location, event_date, event_status)
         self.execute_query(query, parameters)
+    
+    def get_all_events(self):
+        query = """
+        SELECT * FROM Event
+        """
+        return self.fetch_query(query)
+    
+    def get_max_event_id(self):
+        query = """
+        SELECT MAX(EventID) FROM Event
+        """
+        result = self.fetch_query(query)
+        return result[0][0] if result[0][0] is not None else 0
 
 # ------------------------------ Tabel GuestList ------------------------------
 class GuestListDatabase(Database):
@@ -46,20 +60,46 @@ class GuestListDatabase(Database):
         query = """
         CREATE TABLE IF NOT EXISTS GuestList (
             EventID INTEGER NOT NULL,
-            GuestID INTEGER PRIMARY KEY AUTOINCREMENT,
+            GuestID INTEGER NOT NULL,
             GuestName TEXT NOT NULL,
             RSVPStatus TEXT NOT NULL CHECK(RSVPStatus IN ('Hadir', 'Tidak hadir', 'Menyusul', 'Meninggalkan')),
+            PRIMARY KEY (EventID, GuestID),
             FOREIGN KEY(EventID) REFERENCES Event(EventID)
         );
         """
         self.execute_query(query)
 
-    def add_guest(self, event_id, guest_name, rsvp_status):
+    def get_max_guest_id(self, event_id):
         query = """
-        INSERT INTO GuestList (EventID, GuestName, RSVPStatus)
-        VALUES (?, ?, ?)
+        SELECT MAX(GuestID) FROM GuestList WHERE EventID = ?
         """
-        parameters = (event_id, guest_name, rsvp_status)
+        result = self.fetch_query(query, (event_id,))
+        max_id = result[0][0]
+        return max_id if max_id is not None else 0
+
+    def add_guest(self, event_id, guest_name, rsvp_status):
+        guest_id = self.get_max_guest_id(event_id) + 1
+        query = """
+        INSERT INTO GuestList (EventID, GuestID, GuestName, RSVPStatus)
+        VALUES (?, ?, ?, ?)
+        """
+        parameters = (event_id, guest_id, guest_name, rsvp_status)
+        self.execute_query(query, parameters)
+
+    def edit_guest(self, event_id, guest_id, guest_name, rsvp_status):
+        query = """
+        UPDATE GuestList
+        SET GuestName = ?, RSVPStatus = ?
+        WHERE EventID = ? AND GuestID = ?
+        """
+        parameters = (guest_name, rsvp_status, event_id, guest_id)
+        self.execute_query(query, parameters)
+
+    def delete_guest(self, event_id, guest_id):
+        query = """
+        DELETE FROM GuestList WHERE EventID = ? AND GuestID = ?
+        """
+        parameters = (event_id, guest_id)
         self.execute_query(query, parameters)
 
     def get_guests_by_event(self, event_id):
@@ -166,20 +206,20 @@ class RundownDatabase(Database):
         """
         return self.fetch_query(query, (event_id,))
 
-# if __name__ == "__main__":
-#     database_name = "planpal.db"
-#     event_db = EventDatabase(database_name)
-#     event_db.create_event_table()
-#     guest_list_db = GuestListDatabase(database_name)
-#     guest_list_db.create_guest_list_table()
-#     budget_db = BudgetDatabase(database_name)
-#     budget_db.create_budget_table()
-#     vendor_db = VendorDatabase(database_name)
-#     vendor_db.create_vendor_table()
-#     rundown_db = RundownDatabase(database_name)
-#     rundown_db.create_rundown_table()
-#     event_db.close_connection()
-#     guest_list_db.close_connection()
-#     budget_db.close_connection()
-#     vendor_db.close_connection()
-#     rundown_db.close_connection()
+if __name__ == "__main__":
+    database_name = "planpal.db"
+    event_db = EventDatabase(database_name)
+    event_db.create_event_table()
+    guest_list_db = GuestListDatabase(database_name)
+    guest_list_db.create_guest_list_table()
+    budget_db = BudgetDatabase(database_name)
+    budget_db.create_budget_table()
+    vendor_db = VendorDatabase(database_name)
+    vendor_db.create_vendor_table()
+    rundown_db = RundownDatabase(database_name)
+    rundown_db.create_rundown_table()
+    event_db.close_connection()
+    guest_list_db.close_connection()
+    budget_db.close_connection()
+    vendor_db.close_connection()
+    rundown_db.close_connection()

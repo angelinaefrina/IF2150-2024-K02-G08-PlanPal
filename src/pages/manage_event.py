@@ -22,24 +22,26 @@ from src.pages.manage_rundown import RundownManagerApp
 ITEMS_PER_PAGE = 6
 
 class EventManagerApp:
-    def __init__(self, page):
+    def __init__(self, page, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page = page
         self.page.title = "PlanPal"
         self.page.theme_mode = ft.ThemeMode.LIGHT
+        self.event_db = event_db
+        self.guest_list_db = guest_list_db
+        self.budget_db = budget_db
+        self.vendor_db = vendor_db
+        self.rundown_db = rundown_db
+
+        # Initialize dialog attribute
+        self.dialog = None
 
         # Set up the page header first to ensure it is rendered on top
         self.setup_page()
 
-        # Now add EventManagerApp components
-        self.controller = ControllerEvent()
+        # Initialize ControllerEvent with EventDatabase
+        self.controller = ControllerEvent(event_db)
         self.event_display = EventDisplay(self.controller.get_event_list())
         self.form_event = FormEvent()
-
-        # Sample event data
-        self.controller.add_event(1, "Event A", "Location A", "2023-10-01", "Belum dimulai")
-        self.controller.add_event(2, "Event B", "Location B", "2023-10-02", "Sedang berlangsung")
-        self.controller.add_event(3, "Event C", "Location C", "2023-10-03", "Sudah selesai")
-        self.event_display.event_list = self.controller.get_event_list()
 
         self.current_page = 0
         self.create_widgets()
@@ -79,6 +81,75 @@ class EventManagerApp:
         self.prev_button = ft.ElevatedButton(text="Previous", on_click=self.prev_page)
         self.next_button = ft.ElevatedButton(text="Next", on_click=self.next_page)
 
+        self.sort_dropdown = ft.Dropdown(
+            label="Sort by Status",
+            width=200,
+            options=[
+                ft.dropdown.Option("Semua"),
+                ft.dropdown.Option("Belum dimulai"),
+                ft.dropdown.Option("Sedang berlangsung"),
+                ft.dropdown.Option("Sudah selesai"),
+                ft.dropdown.Option("Batal"),
+            ],
+            on_change=self.sort_events_by_status
+        )
+
+        self.dropdown_container = ft.Container(
+            content=ft.Row(
+                controls=[self.sort_dropdown],
+                alignment=ft.MainAxisAlignment.END,
+            ),
+            padding=ft.padding.only(right=20,top=10),
+        )
+
+        self.page.add(self.dropdown_container)
+
+    def sort_events_by_status(self,e):
+        selected_status = e.control.value
+        self.clear_dynamic_controls()
+        
+        if selected_status == "Semua":
+            self.event_display.event_list = self.controller.get_event_list()
+            self.update_display()
+        else:
+            filtered_events = [event for event in self.controller.get_event_list() if event["EventStatus"] == selected_status]
+    
+            if not filtered_events:
+                no_events_message = ft.Container(
+                    content=ft.Text(
+                        f"Tidak ada event dengan status '{selected_status}'.",
+                        size=24,
+                        color="#4539B4", 
+                        font_family="Default_Bold",
+                    ),
+                    alignment=ft.alignment.center,
+                    expand=True
+                )
+                self.page.add(
+                    ft.Column(
+                        controls=[
+                            self.dropdown_container,
+                            no_events_message,
+                            ft.Container(
+                                content=self.add_button,
+                                alignment=ft.alignment.center,
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        expand=True,
+                    )
+                )
+                self.page.update()
+            else:
+                self.event_display.event_list = filtered_events
+                self.update_display()
+
+    def clear_dynamic_controls(self):
+        dynamic_controls = self.page.controls[1:]
+        for control in dynamic_controls:
+            self.page.controls.remove(control)
+        self.page.update()
+
     def add_event(self, e):
         self.form_event.display_form(self.page, self.on_form_submit, is_edit=False)
 
@@ -113,10 +184,10 @@ class EventManagerApp:
                     spacing=20,
                     alignment=ft.MainAxisAlignment.START
                 ),
-                actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
-                         ft.TextButton("Lihat Rundown", on_click=self.open_rundown_page),
-                         ft.TextButton("Daftar Vendor",  on_click=self.open_vendor_page),
-                         ft.TextButton("Daftar Tamu",  on_click=self.open_guest_page)
+                actions=[ft.TextButton("Lihat Anggaran", on_click=lambda e: self.open_budget_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
+                         ft.TextButton("Lihat Rundown", on_click=lambda e: self.open_rundown_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
+                         ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
+                         ft.TextButton("Daftar Tamu", on_click=lambda e: self.open_guest_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db))
                         ]
             )
             page.dialog = self.dialog
@@ -127,12 +198,16 @@ class EventManagerApp:
             self.show_error_dialog(f"Event with ID '{event_id}' not found.")
 
     def update_display(self):
+        # Refresh the event list from the database
+        self.event_display.event_list = self.controller.get_event_list()
         total_pages = len(self.event_display.event_list) // ITEMS_PER_PAGE + (1 if len(self.event_display.event_list) % ITEMS_PER_PAGE > 0 else 0)
 
         # Remove dynamic controls (event cards, etc.) if needed
-        dynamic_controls = self.page.controls[1:]  # Assuming the header is the first control
-        for control in dynamic_controls:
-            self.page.controls.remove(control)
+        # dynamic_controls = self.page.controls[1:]  # Assuming the header is the first control
+        # for control in dynamic_controls:
+        #     self.page.controls.remove(control)
+
+        self.clear_dynamic_controls()
 
         start_index = self.current_page * ITEMS_PER_PAGE
         end_index = start_index + ITEMS_PER_PAGE
@@ -142,18 +217,28 @@ class EventManagerApp:
         row = []
         for index, event in enumerate(events_to_display):
             card = EventCard(
-                event_title=event["EventName"],
-                event_date=event["EventDate"],
-                on_view_details_click=lambda e, event_id=event["EventID"]: self.view_event(self.page, event_id),
-                on_edit_click=lambda e, event_id=event["EventID"]: self.edit_event(event_id),
-                on_delete_click=lambda e, event_id=event["EventID"]: self.delete_event(event_id)
+                event_title=event[1],
+                event_date=event[3],
+                on_view_details_click=lambda e, event_id=event[0]: self.view_event(self.page, event_id),
+                on_edit_click=lambda e, event_id=event[0]: self.edit_event(event_id),
+                on_delete_click=lambda e, event_id=event[0]: self.delete_event(event_id)
             )
             row.append(card)
             if len(row) == 3 or index == len(events_to_display) - 1:
                 rows.append(ft.Row(controls=row, spacing=20, alignment=ft.MainAxisAlignment.CENTER))
                 row = []
 
-        # self.page.add(display_container)
+        display_container = ft.Container(
+            content=ft.Column(
+                controls=rows,
+                spacing=20,
+                alignment=ft.MainAxisAlignment.START,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                expand=True,
+            ),
+            expand=True,
+            alignment=ft.alignment.top_center,
+        )
 
         self.prev_button.disabled = self.current_page == 0
         self.next_button.disabled = self.current_page >= total_pages - 1
@@ -202,88 +287,87 @@ class EventManagerApp:
     def on_form_submit(self, form_data, is_edit, original_event_id=None):
         if form_data:
             if is_edit:
-                # Check if the new EventID already exists
-                if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
-                    self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
-                else:
-                    self.controller.delete_event(original_event_id)
-                    self.controller.add_event(
-                        form_data["EventID"],
-                        form_data["EventName"],
-                        form_data["EventLocation"],
-                        form_data["EventDate"],
-                        form_data["EventStatus"]
-                    )
-                    self.show_success_dialog("Event updated successfully!")
+                self.controller.delete_event(original_event_id)
+                self.controller.add_event(
+                    original_event_id,
+                    form_data["EventName"],
+                    form_data["EventLocation"],
+                    form_data["EventDate"],
+                    form_data["EventStatus"]
+                )
+                self.show_success_dialog("Event updated successfully!")
             else:
-                if original_event_id != form_data["EventID"] and self.controller.get_event_details(form_data["EventID"]):
-                    self.show_error_dialog(f"Event with ID '{form_data['EventID']}' already exists.")
-                else:
-                    self.controller.add_event(
-                        form_data["EventID"],
-                        form_data["EventName"],
-                        form_data["EventLocation"],
-                        form_data["EventDate"],
-                        form_data["EventStatus"]
-                    )
-                    self.show_success_dialog("Event added successfully!")
+                new_event_id = self.event_db.get_max_event_id() + 1
+                self.controller.add_event(
+                    new_event_id,
+                    form_data["EventName"],
+                    form_data["EventLocation"],
+                    form_data["EventDate"],
+                    form_data["EventStatus"]
+                )
+                self.show_success_dialog("Event added successfully!")
             self.update_display()
 
     def show_error_dialog(self, message):
-        error_dialog = ft.AlertDialog(
+        self.dialog = ft.AlertDialog(
             title=ft.Text("Error"),
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=lambda e: self.close_error_dialog())]
         )
-        self.page.dialog = error_dialog
-        error_dialog.open = True
+        self.page.dialog = self.dialog
+        self.dialog.open = True
         self.page.update()
 
     def show_success_dialog(self, message):
-        success_dialog = ft.AlertDialog(
+        self.dialog = ft.AlertDialog(
             title=ft.Text("Success"),
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=lambda e: self.close_success_dialog())]
         )
-        self.page.dialog = success_dialog
-        success_dialog.open = True
+        self.page.dialog = self.dialog
+        self.dialog.open = True
         self.page.update()
 
     def close_error_dialog(self):
-        self.page.dialog.open = False
-        self.page.update()
+        if self.dialog:
+            self.dialog.open = False
+            self.page.update()
 
     def close_success_dialog(self):
-        self.page.dialog.open = False
+        if self.dialog:
+            self.dialog.open = False
+            self.page.update()
+
+    def open_budget_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
+        self.page.controls.clear()
+        if self.dialog:
+            self.dialog.open = False
+        BudgetManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
-    def open_budget_page(self, e):
+    def open_guest_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        BudgetManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        GuestManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
-    def open_guest_page(self, e):
+    def open_vendor_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        GuestManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        VendorManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
-    def open_vendor_page(self, e):
+    def open_rundown_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
-        self.dialog.open = False
-        VendorManagerApp(self.page)
-        self.page.update()
-
-    def open_rundown_page(self, e):
-        self.page.controls.clear()
-        self.dialog.open = False
-        RundownManagerApp(self.page)
+        if self.dialog:
+            self.dialog.open = False
+        RundownManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
 def main(page: ft.Page):
-    app = EventManagerApp(page)
-
+    app = EventManagerApp(page, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
 
 if __name__ == "__main__":
     ft.app(target=main)
