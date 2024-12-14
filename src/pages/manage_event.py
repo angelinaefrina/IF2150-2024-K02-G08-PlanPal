@@ -116,7 +116,7 @@ class EventManagerApp:
                     alignment=ft.MainAxisAlignment.START
                 ),
                 actions=[ft.TextButton("Lihat Anggaran", on_click=self.open_budget_page),
-                         ft.TextButton("Lihat Rundown", on_click=self.open_rundown_page),
+                         ft.TextButton("Lihat Rundown", on_click=lambda e: self.open_rundown_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Vendor", on_click=lambda e: self.open_vendor_page(e, event_id, self.event_db, self.guest_list_db, self.budget_db, self.vendor_db, self.rundown_db)),
                          ft.TextButton("Daftar Tamu", on_click=self.open_guest_page)
                         ]
@@ -288,11 +288,11 @@ class EventManagerApp:
         VendorManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
-    def open_rundown_page(self, e):
+    def open_rundown_page(self, e, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db):
         self.page.controls.clear()
         if self.dialog:
             self.dialog.open = False
-        RundownManagerApp(self.page)
+        RundownManagerApp(self.page, event_id, event_db, guest_list_db, budget_db, vendor_db, rundown_db)
         self.page.update()
 
 def main(page: ft.Page):
