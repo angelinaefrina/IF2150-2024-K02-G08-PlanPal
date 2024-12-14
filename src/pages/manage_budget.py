@@ -37,9 +37,9 @@ class BudgetManagerApp:
 
         # Set fonts
         self.page.fonts = {
-            "Header": "../assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
-            "Default_Bold": "../assets/fonts/Afacad/Afacad-Bold.ttf",
-            "Default_Regular": "../assets/fonts/Afacad/Afacad-Regular.ttf",
+            "Header": "./assets/fonts/Fredoka/Fredoka-SemiBold.ttf",
+            "Default_Bold": "./assets/fonts/Afacad/Afacad-Bold.ttf",
+            "Default_Regular": "./assets/fonts/Afacad/Afacad-Regular.ttf",
         }
         # Header PlanPal
         self.page.add(
